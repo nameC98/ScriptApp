@@ -3,7 +3,12 @@ import { signup } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const [userData, setUserData] = useState({ email: "", password: "" });
+  // Include name in the initial state
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -27,6 +32,14 @@ function Signup() {
         <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
           <input
             type="email"
             name="email"

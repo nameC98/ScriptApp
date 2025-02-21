@@ -1,8 +1,10 @@
+// models/User.js
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
+    name: { type: String, required: true }, // <-- Added name field
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
     subscriptionStatus: { type: String, default: "inactive" }, // active/inactive

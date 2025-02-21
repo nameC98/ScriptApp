@@ -28,18 +28,28 @@ const client = new OpenAI({
 router.get("/", async (req, res) => {
   try {
     const scripts = await Script.find();
-    res.json(scripts);
+    res.json(scripts); // Each script now contains createdAt and updatedAt
   } catch (error) {
     console.error("Error fetching scripts:", error);
     res.status(500).json({ error: "Error fetching scripts" });
   }
 });
 
-// GET: Fetch scripts for a specific user
+// GET: Fetch scripts for a specific user, with optional date filtering
 router.get("/my-scripts/:userId", async (req, res) => {
   const { userId } = req.params;
+  // Optional query parameters: startDate and endDate (in YYYY-MM-DD format)
+  const { startDate, endDate } = req.query;
+  let filter = { userId };
+
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) filter.createdAt.$gte = new Date(startDate);
+    if (endDate) filter.createdAt.$lte = new Date(endDate);
+  }
+
   try {
-    const scripts = await Script.find({ userId });
+    const scripts = await Script.find(filter);
     if (!scripts.length) {
       return res.status(404).json({ error: "No scripts found for this user" });
     }
@@ -215,7 +225,7 @@ router.post("/generate", async (req, res) => {
       generatedScript += "\n" + continuation;
     }
 
-    // Create and save the script in your database
+    // Create and save the script in your database (timestamps will be added automatically)
     const script = new Script({
       userId,
       title,

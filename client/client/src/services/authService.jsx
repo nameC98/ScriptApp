@@ -5,7 +5,7 @@ export const getToken = () => {
 };
 
 export const signup = async (userData) => {
-  const response = await fetch(`${API_URL}/signup`, {
+  const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
@@ -30,6 +30,24 @@ export const login = async (credentials) => {
   localStorage.setItem("userId", data.userId);
 
   return data;
+};
+
+export const forgotPassword = async ({ email }) => {
+  const response = await fetch(`${API_URL}/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  return response.json();
+};
+
+export const resetPassword = async ({ token, newPassword }) => {
+  const response = await fetch(`${API_URL}/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  return response.json();
 };
 
 export const logout = () => {

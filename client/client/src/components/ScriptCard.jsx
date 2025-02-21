@@ -33,7 +33,7 @@ function ScriptCard({ script }) {
 
   return (
     <div
-      className="bg-white shadow-lg rounded-lg p-3 hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between h-full cursor-pointer"
+      className="bg-white shadow-lg rounded-lg  p-3 hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between h-full cursor-pointer"
       onClick={handleCardClick}
     >
       {/* Title & Snippet */}

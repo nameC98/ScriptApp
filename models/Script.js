@@ -27,7 +27,7 @@ const scriptSchema = new mongoose.Schema(
     },
     isAdmin: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
 
 const Script = mongoose.model("Script", scriptSchema);

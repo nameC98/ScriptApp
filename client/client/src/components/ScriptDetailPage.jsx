@@ -27,7 +27,8 @@ function ScriptDetailPage() {
 
   // New state for storing available prompts (for the script’s niche)
   const [availablePrompts, setAvailablePrompts] = useState([]);
-
+  const userId2 = localStorage.getItem("userId");
+  console.log(userId2);
   // Fetch the script details
   const fetchScript = async (scriptId) => {
     try {
@@ -134,7 +135,7 @@ function ScriptDetailPage() {
     console.log(prompt);
     setRephraseLoading(true);
     try {
-      const userId = "67af2392fdbd996fca933a22"; // Replace with actual user ID
+      const userId = userId2; // Replace with actual user ID
       const response = await fetch(
         `http://localhost:5000/api/scripts/rephrase-preview`,
         {
@@ -165,7 +166,7 @@ function ScriptDetailPage() {
   // Accept rephrased script and save it
   const acceptRephrasedScript = async () => {
     try {
-      const userId = "67af2392fdbd996fca933a22"; // Replace with actual user ID
+      const userId = userId2; // Replace with actual user ID
       const response = await fetch(
         `http://localhost:5000/api/scripts/rephrase-save`,
         {

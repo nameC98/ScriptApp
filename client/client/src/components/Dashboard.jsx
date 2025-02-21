@@ -5,11 +5,13 @@ import "../App.css";
 function Dashboard() {
   const [allScripts, setAllScripts] = useState([]);
   const [scripts, setScripts] = useState([]);
-  const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [nicheFilter, setNicheFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch all scripts on mount and filter for admin scripts only
+  // Fetch all scripts and filter to only include admin-created scripts
   useEffect(() => {
     const fetchScripts = async () => {
       setIsLoading(true);
@@ -20,10 +22,14 @@ function Dashboard() {
           throw new Error("Failed to fetch scripts");
         }
         const data = await response.json();
-        // Filter to only include admin-created scripts
+        // Filter for admin-created scripts
         const adminScripts = data.filter((script) => script.isAdmin);
-        setAllScripts(adminScripts);
-        setScripts(adminScripts);
+        // Sort scripts so that the most recent ones are first
+        const sortedScripts = adminScripts.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setAllScripts(sortedScripts);
+        setScripts(sortedScripts);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -34,53 +40,126 @@ function Dashboard() {
     fetchScripts();
   }, []);
 
-  // Apply client-side filtering based on the niche
+  // Update filtered scripts when any filter changes
   useEffect(() => {
-    if (filter === "all") {
-      setScripts(allScripts);
-    } else {
-      const filtered = allScripts.filter(
-        (script) => script.niche.toLowerCase() === filter.toLowerCase()
-      );
-      setScripts(filtered);
+    let filtered = allScripts;
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((script) => script.status === statusFilter);
     }
-  }, [filter, allScripts]);
+
+    // Filter by date
+    if (dateFilter) {
+      filtered = filtered.filter((script) => {
+        const scriptDate = new Date(script.createdAt)
+          .toISOString()
+          .split("T")[0];
+        return scriptDate === dateFilter;
+      });
+    }
+
+    // Filter by niche
+    if (nicheFilter !== "all") {
+      filtered = filtered.filter(
+        (script) => script.niche.toLowerCase() === nicheFilter.toLowerCase()
+      );
+    }
+
+    // Always ensure the filtered list is sorted (most recent first)
+    filtered = filtered.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    setScripts(filtered);
+  }, [statusFilter, dateFilter, nicheFilter, allScripts]);
+
+  // Compute unique niches from the fetched scripts
+  const uniqueNiches = [
+    "all",
+    ...new Set(allScripts.map((script) => script.niche)),
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className=" bg-gray-100 p-6 h-[90vh]">
       <div className="container mx-auto">
         <h1 className="text-3xl md:text-3xl font-bold libre-caslon-display-regular text-center mb-8">
           Script Dashboard
         </h1>
-        <div className="flex flex-col sm:flex-row items-center justify-center mb-8 space-y-4 sm:space-y-0 sm:space-x-4">
-          <label className="text-lg font-medium" htmlFor="nicheFilter">
-            Filter by Niche:
-          </label>
-          <select
-            id="nicheFilter"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 nav font-bold focus:ring-blue-400"
-          >
-            <option value="all" className="font-bold">
-              All
-            </option>
-            <option className="font-bold" value="tech">
-              Tech
-            </option>
-            <option className="font-bold" value="gaming">
-              Gaming
-            </option>
-            <option className="font-bold" value="travel">
-              Travel
-            </option>
-            <option className="font-bold" value="finance">
-              Finance
-            </option>
-            <option className="font-bold" value="lifestyle">
-              Lifestyle
-            </option>
-          </select>
+
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white shadow-lg rounded-lg p-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Status Filter Buttons */}
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setStatusFilter("all")}
+                className={`px-4 py-2 rounded-lg ${
+                  statusFilter === "all"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setStatusFilter("used")}
+                className={`px-4 py-2 rounded-lg ${
+                  statusFilter === "used"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Used
+              </button>
+              <button
+                onClick={() => setStatusFilter("unused")}
+                className={`px-4 py-2 rounded-lg ${
+                  statusFilter === "unused"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Unused
+              </button>
+            </div>
+
+            {/* Date Picker */}
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg shadow-sm"
+              />
+              <button
+                onClick={() => setDateFilter("")}
+                className="px-4 py-2 rounded-lg border border-gray-300"
+              >
+                Clear Date Filter
+              </button>
+            </div>
+          </div>
+
+          {/* Niche Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="nicheFilter" className="text-lg font-medium">
+              Filter by Niche:
+            </label>
+            <select
+              id="nicheFilter"
+              value={nicheFilter}
+              onChange={(e) => setNicheFilter(e.target.value)}
+              className="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 font-bold focus:ring-blue-400"
+            >
+              {uniqueNiches.map((niche, index) => (
+                <option key={index} value={niche}>
+                  {niche === "all"
+                    ? "All"
+                    : niche.charAt(0).toUpperCase() + niche.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {isLoading ? (
@@ -89,13 +168,15 @@ function Dashboard() {
           <p className="text-center text-red-500">{error}</p>
         ) : scripts.length === 0 ? (
           <p className="text-center font-serif">
-            No scripts found for this niche.
+            No scripts found for the selected filters.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {scripts.map((script) => (
-              <ScriptCard key={script._id} script={script} />
-            ))}
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 mt-[20px] px-5 md:grid-cols-3 gap-6">
+              {scripts.map((script) => (
+                <ScriptCard key={script._id} script={script} />
+              ))}
+            </div>
           </div>
         )}
       </div>

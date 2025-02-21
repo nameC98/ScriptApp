@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
-const promptSchema = new mongoose.Schema({
-  niche: { type: String, required: true },
-  style: { type: String, required: true },
-  promptTemplate: { type: String, required: true },
-});
+const promptSchema = new mongoose.Schema(
+  {
+    niche: { type: String, required: true },
+    style: { type: String, required: true },
+    promptTemplate: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
 const Prompt = mongoose.model("Prompt", promptSchema);
 export default Prompt;
