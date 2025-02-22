@@ -11,6 +11,9 @@ import UserAvatar from "./components/UserAvatar";
 import MyScripts from "./MyScripts";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import SubscriptionCancel from "./pages/SubscriptionCancel";
+import BoostTokens from "./pages/Boosttokens";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -58,6 +61,12 @@ function App() {
               >
                 Subscription
               </Link>
+              <Link
+                to="/boost-tokens"
+                className="text-white hover:text-gray-300"
+              >
+                Boost
+              </Link>
             </div>
             <div className="flex items-center space-x-4">
               {user && (
@@ -90,11 +99,16 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/myscripts" element={<MyScripts />} />
           <Route path="/signup" element={<Signup />} />
-
+          <Route
+            path="/subscription-success"
+            element={<SubscriptionSuccess />}
+          />
+          <Route path="/subscription-cancel" element={<SubscriptionCancel />} />
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/generate" element={<CustomScriptForm />} />
+            <Route path="/boost-tokens" element={<BoostTokens />} />
             <Route path="/scripts/:id" element={<ScriptDetailPage />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
