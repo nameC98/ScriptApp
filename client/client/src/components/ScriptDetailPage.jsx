@@ -130,9 +130,7 @@ function ScriptDetailPage() {
     setShowStyleModal(true);
   };
 
-  // Updated: Check subscription status before rephrasing
   const handleSelectPrompt = async (prompt) => {
-    // Check user's subscription status first
     try {
       const statusResponse = await fetch(
         `http://localhost:5000/api/subscription/status?userId=${userId2}`
@@ -264,28 +262,30 @@ function ScriptDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-100 to-gray-300">
-        <p className="text-2xl font-bold text-gray-800">Loading...</p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
+        <p className="text-xl sm:text-2xl font-bold text-gray-800">
+          Loading...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-100 to-gray-300">
-        <p className="text-2xl font-bold text-yellow-500">{error}</p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
+        <p className="text-xl sm:text-2xl font-bold text-yellow-500">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-100 to-gray-300 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 py-8 px-4">
       <ToastContainer />
-      <div className="relative max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
+      <div className="relative max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-4 sm:p-8">
         {/* Header Section with Buttons Overlay */}
         <div className="relative mb-6 border-b pb-4">
-          {/* Buttons Overlay: Positioned at the top left */}
-          <div className="absolute top-0 left-0 flex gap-2 p-2 z-10 bg-white/80 rounded-b">
+          {/* Buttons Overlay: Added flex-wrap for responsiveness */}
+          <div className="absolute top-0 left-0 flex flex-wrap gap-2 p-2 z-10 bg-white/80 rounded-b">
             <button
               onClick={handleDownload}
               className="flex items-center gap-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-1 px-2 rounded shadow transition-all text-xs"
@@ -325,11 +325,11 @@ function ScriptDetailPage() {
             </button>
           </div>
           {/* Title with top padding to avoid overlap */}
-          <h1 className="text-4xl font-extrabold text-gray-900 pt-16 break-words">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 pt-16 break-words">
             {script.title}
           </h1>
           {/* Additional Header Details */}
-          <div className="mt-4 flex items-center space-x-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
               {script.niche.charAt(0).toUpperCase() + script.niche.slice(1)}
             </span>
@@ -357,15 +357,14 @@ function ScriptDetailPage() {
       {/* Modal for Style Selection */}
       {showStyleModal && (
         <Modal onClose={() => setShowStyleModal(false)}>
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
               Choose a Rephrase Style
             </h2>
             <p className="mb-4">
               {rephraseLoading
                 ? "Rephrasing, please wait..."
-                : `Select one of the available prompt styles for the `}
-              <strong>{script.niche}</strong> niche:
+                : `Select one of the available prompt styles for the ${script.niche} niche:`}
             </p>
             {rephraseLoading ? (
               <div className="flex justify-center items-center h-24">
@@ -404,8 +403,8 @@ function ScriptDetailPage() {
       {/* Modal for Rephrase Preview */}
       {showPreviewModal && (
         <Modal onClose={cancelRephrasedScript}>
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
               Rephrased Script Preview
             </h2>
             <div className="mb-4">
@@ -445,9 +444,12 @@ function ScriptDetailPage() {
 
       {/* Modal for Editing the Current Script */}
       {showEditModal && (
-        <Modal onClose={() => setShowEditModal(false)} customClass="max-w-3xl">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+        <Modal
+          onClose={() => setShowEditModal(false)}
+          customClass="max-w-full sm:max-w-3xl"
+        >
+          <div className="p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
               Edit Script
             </h2>
             <div className="mb-4">
@@ -463,7 +465,7 @@ function ScriptDetailPage() {
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full h-96 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full h-60 sm:h-96 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Script Content"
               />
             </div>

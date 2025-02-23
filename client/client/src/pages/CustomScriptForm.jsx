@@ -122,10 +122,10 @@ function CustomScriptForm() {
   };
 
   return (
-    <div className="h-[90vh] nav text-[13px] bg-[#EEF5FF] flex items-center justify-center p-6">
-      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Generate Custom Script
+    <div className="h-[90vh] text-gray-500 nav text-[13px] bg-[#EEF5FF] flex items-center justify-center p-6">
+      <div className="bg-white shadow-md rounded-lg sm:p-8 py-[1rem] px-4 w-full max-w-2xl">
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-500">
+          Generate Script
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Niche */}
@@ -140,7 +140,7 @@ function CustomScriptForm() {
               id="niche"
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-0"
             >
               <option value="">Select Niche</option>
               <option value="tech">Tech</option>
@@ -163,7 +163,7 @@ function CustomScriptForm() {
               id="length"
               value={length}
               onChange={(e) => setLength(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-0"
             >
               <option value="">Select Length</option>
               <option value="short">Short (1-2 minutes)</option>
@@ -186,7 +186,7 @@ function CustomScriptForm() {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Enter topic or title"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-0"
             />
           </div>
 
@@ -202,7 +202,7 @@ function CustomScriptForm() {
               id="channel"
               value={channel}
               onChange={(e) => setChannel(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-0"
             >
               <option value="">Select Channel</option>
               <option value="MKBHD">MKBHD</option>
@@ -222,12 +222,12 @@ function CustomScriptForm() {
                 value={selectedPromptStyle}
                 readOnly
                 placeholder="No prompt style selected"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
+                className="flex-1 w-[20px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-0"
               />
               <button
                 type="button"
                 onClick={openPromptStyleModal}
-                className="ml-3 gradient-button  text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                className="ml-3  gradient-button  text-white font-semibold py-2 px-4 rounded-md transition duration-200"
               >
                 {selectedPromptStyle ? "Change Prompt" : "Select Prompt"}
               </button>
@@ -253,7 +253,7 @@ function CustomScriptForm() {
       {showPromptStyleModal && (
         <Modal onClose={() => setShowPromptStyleModal(false)}>
           <div className="p-6 nav text-[13px]">
-            <h2 className="text-2xl text-black/70 font-bold mb-4 text-gray-800">
+            <h2 className="sm:text-2xl text-sm text-black/70 font-bold mb-4 text-gray-600">
               Choose a Prompt Style for {niche}
             </h2>
             {availablePrompts.length > 0 ? (

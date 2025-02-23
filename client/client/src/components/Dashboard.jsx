@@ -94,7 +94,7 @@ function Dashboard() {
               <div className="gradient-border">
                 <button
                   onClick={() => setStatusFilter("all")}
-                  className={`px-5 py-1 rounded-full  btn nav  text-[13px] ${
+                  className={`px-5 text-[10px] sm:text-[12px] py-1 rounded-full  btn nav   ${
                     statusFilter === "all"
                       ? "btn text-white"
                       : " bg-[#EEF5FF] font-bold text-black"
@@ -106,7 +106,7 @@ function Dashboard() {
               <div className="gradient-border">
                 <button
                   onClick={() => setStatusFilter("used")}
-                  className={`px-4 py-2 nav btn text-[13px] rounded-[250px] ${
+                  className={`px-4 py-2 nav text-[10px] sm:text-[12px] btn  rounded-[250px] ${
                     statusFilter === "used"
                       ? "btn text-white"
                       : " bg-[#EEF5FF] font-bold text-black"
@@ -118,7 +118,7 @@ function Dashboard() {
               <div className="gradient-border">
                 <button
                   onClick={() => setStatusFilter("unused")}
-                  className={`px-4 nav  text-[13px] btn py-2 rounded-[250px]  ${
+                  className={`px-4 text-[10px] sm:text-[12px] nav   btn py-2 rounded-[250px]  ${
                     statusFilter === "unused"
                       ? "btn text-white"
                       : " bg-[#EEF5FF] font-bold text-black"
@@ -137,14 +137,14 @@ function Dashboard() {
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-3 py-2 bg-[#EEF5FF] border nav outline-none border-none  btn  text-[13px] rounded-lg shadow-sm"
+                className="px-3 py-2 text-[10px] sm:text-[12px] bg-[#EEF5FF] border nav outline-none border-none  btn   rounded-lg shadow-sm"
               />
             </div>
             <div className="gradient-border">
               {" "}
               <button
                 onClick={() => setDateFilter("")}
-                className="px-4 py-2 nav  text-[13px] btn bg-[#EEF5FF] rounded-lg border "
+                className="px-4 py-2 nav text-[10px] sm:text-[12px] btn bg-[#EEF5FF] rounded-lg border "
               >
                 Clear Date Filter
               </button>
@@ -153,24 +153,18 @@ function Dashboard() {
 
           {/* Niche Filter Dropdown */}
           <div className="flex items-center gap-2">
-            <label
-              htmlFor="nicheFilter"
-              className=" nav  text-[13px] font-medium"
-            >
-              Filter by Niche:
-            </label>
             <div className="gradient-border ">
               {" "}
               <select
                 id="nicheFilter"
                 value={nicheFilter}
                 onChange={(e) => setNicheFilter(e.target.value)}
-                className="px-4 py-1 rounded-[250px] border nav  text-[13px] bg-[#EEF5FF]  focus:outline-none  font-bold focus:ring-0"
+                className="px-4 py-1 rounded-[250px] border nav  text-[13px] bg-[#EEF5FF] md:text-[13px]   sm:text-[12px] focus:outline-none  font-bold focus:ring-0"
               >
                 {uniqueNiches.map((niche, index) => (
                   <option key={index} value={niche}>
                     {niche === "all"
-                      ? "All"
+                      ? "  All Niches"
                       : niche.charAt(0).toUpperCase() + niche.slice(1)}
                   </option>
                 ))}

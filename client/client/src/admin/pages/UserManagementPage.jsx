@@ -125,20 +125,20 @@ const UserManagementPage = () => {
     : [];
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       <h1 className="text-2xl font-bold mb-4">User Management</h1>
 
-      {/* Top controls: Search and Add User */}
-      <div className="mb-4 flex justify-between items-center">
+      {/* Top Controls: Search and Add User */}
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <input
           type="text"
           placeholder="Search by name or email"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-4 p-2 border rounded w-full max-w-xs"
+          className="p-2 border rounded w-full sm:max-w-xs"
         />
         <button
-          className="bg-indigo-500 text-white py-1 px-4 rounded ml-4"
+          className="bg-indigo-500 text-white py-2 px-4 rounded"
           onClick={() => setShowAddForm(!showAddForm)}
         >
           {showAddForm ? "Cancel" : "Add User"}
@@ -147,132 +147,142 @@ const UserManagementPage = () => {
 
       {/* Add User Form */}
       {showAddForm && (
-        <form onSubmit={handleAddUser} className="mb-4 p-4 border rounded">
+        <form
+          onSubmit={handleAddUser}
+          className="mb-4 p-4 border rounded bg-gray-50"
+        >
           <div className="mb-2">
-            <label className="block mb-1">Name:</label>
+            <label className="block mb-1 text-sm font-medium">Name:</label>
             <input
               type="text"
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              className="p-1 border rounded w-full"
+              className="p-2 border rounded w-full"
               required
             />
           </div>
           <div className="mb-2">
-            <label className="block mb-1">Email:</label>
+            <label className="block mb-1 text-sm font-medium">Email:</label>
             <input
               type="email"
               value={newUser.email}
               onChange={(e) =>
                 setNewUser({ ...newUser, email: e.target.value })
               }
-              className="p-1 border rounded w-full"
+              className="p-2 border rounded w-full"
               required
             />
           </div>
           <div className="mb-2">
-            <label className="block mb-1">Password:</label>
+            <label className="block mb-1 text-sm font-medium">Password:</label>
             <input
               type="password"
               value={newUser.password}
               onChange={(e) =>
                 setNewUser({ ...newUser, password: e.target.value })
               }
-              className="p-1 border rounded w-full"
+              className="p-2 border rounded w-full"
               required
             />
           </div>
           <button
             type="submit"
-            className="bg-green-500 text-white py-1 px-4 rounded"
+            className="bg-green-500 text-white py-2 px-4 rounded"
           >
             Add User
           </button>
         </form>
       )}
 
+      {/* Users Table */}
       {loading ? (
         <p>Loading users...</p>
       ) : (
-        <table className="min-w-full bg-white border">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border">Name</th>
-              <th className="py-2 px-4 border">Email</th>
-              <th className="py-2 px-4 border">Subscription</th>
-              <th className="py-2 px-4 border">Token Balance</th>
-              <th className="py-2 px-4 border">Created At</th>
-              <th className="py-2 px-4 border">Plan Activated</th>
-              <th className="py-2 px-4 border">Plan Deactivated</th>
-              <th className="py-2 px-4 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
-                <tr key={user._id}>
-                  <td className="py-2 px-4 border">{user.name || "N/A"}</td>
-                  <td className="py-2 px-4 border">{user.email || "N/A"}</td>
-                  <td className="py-2 px-4 border">
-                    {user.subscriptionStatus || "N/A"}
-                  </td>
-                  <td className="py-2 px-4 border">{user.tokens}</td>
-                  <td className="py-2 px-4 border">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString()
-                      : "N/A"}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    {user.planActivatedAt
-                      ? new Date(user.planActivatedAt).toLocaleDateString()
-                      : "N/A"}
-                  </td>
-                  <td className="py-2 px-4 border">
-                    {user.planDeactivatedAt
-                      ? new Date(user.planDeactivatedAt).toLocaleDateString()
-                      : "N/A"}
-                  </td>
-                  <td className="py-2 px-4 border space-x-2">
-                    <button
-                      className="bg-blue-500 text-white py-1 px-2 rounded"
-                      onClick={() => handleResetTokens(user._id)}
-                    >
-                      Reset Tokens
-                    </button>
-                    <button
-                      className="bg-purple-500 text-white py-1 px-2 rounded"
-                      onClick={() => handleEditTokens(user._id, user.tokens)}
-                    >
-                      Edit Tokens
-                    </button>
-                    <button
-                      className="bg-yellow-500 text-white py-1 px-2 rounded"
-                      onClick={() =>
-                        handlePlanToggle(user._id, user.subscriptionStatus)
-                      }
-                    >
-                      {user.subscriptionStatus === "active"
-                        ? "Deactivate Plan"
-                        : "Activate Plan"}
-                    </button>
-                    <button
-                      className="bg-red-500 text-white py-1 px-2 rounded"
-                      onClick={() => handleDeleteUser(user._id)}
-                    >
-                      Delete
-                    </button>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border text-sm">Name</th>
+                <th className="py-2 px-4 border text-sm">Email</th>
+                <th className="py-2 px-4 border text-sm">Subscription</th>
+                <th className="py-2 px-4 border text-sm">Token Balance</th>
+                <th className="py-2 px-4 border text-sm">Created At</th>
+                <th className="py-2 px-4 border text-sm">Plan Activated</th>
+                <th className="py-2 px-4 border text-sm">Plan Deactivated</th>
+                <th className="py-2 px-4 border text-sm">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <tr key={user._id} className="hover:bg-gray-100">
+                    <td className="py-2 px-4 border text-sm">
+                      {user.name || "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm">
+                      {user.email || "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm">
+                      {user.subscriptionStatus || "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm">{user.tokens}</td>
+                    <td className="py-2 px-4 border text-sm">
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm">
+                      {user.planActivatedAt
+                        ? new Date(user.planActivatedAt).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm">
+                      {user.planDeactivatedAt
+                        ? new Date(user.planDeactivatedAt).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border text-sm space-y-2 sm:space-y-0 sm:space-x-2">
+                      <button
+                        className="bg-blue-500 text-white py-1 px-2 rounded text-xs sm:text-sm"
+                        onClick={() => handleResetTokens(user._id)}
+                      >
+                        Reset Tokens
+                      </button>
+                      <button
+                        className="bg-purple-500 text-white py-1 px-2 rounded text-xs sm:text-sm"
+                        onClick={() => handleEditTokens(user._id, user.tokens)}
+                      >
+                        Edit Tokens
+                      </button>
+                      <button
+                        className="bg-yellow-500 text-white py-1 px-2 rounded text-xs sm:text-sm"
+                        onClick={() =>
+                          handlePlanToggle(user._id, user.subscriptionStatus)
+                        }
+                      >
+                        {user.subscriptionStatus === "active"
+                          ? "Deactivate Plan"
+                          : "Activate Plan"}
+                      </button>
+                      <button
+                        className="bg-red-500 text-white py-1 px-2 rounded text-xs sm:text-sm"
+                        onClick={() => handleDeleteUser(user._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-4 text-sm">
+                    No users found.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center py-4">
-                  No users found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

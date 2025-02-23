@@ -12,7 +12,6 @@ function MyScripts() {
 
   // Retrieve the logged-in user's ID from localStorage
   const userId = localStorage.getItem("userId");
-  console.log(userId);
 
   useEffect(() => {
     const fetchMyScripts = async () => {
@@ -49,7 +48,7 @@ function MyScripts() {
   useEffect(() => {
     let filtered = scripts;
 
-    // Filter by status (used/unused)
+    // Filter by status
     if (statusFilter !== "all") {
       filtered = filtered.filter((script) => script.status === statusFilter);
     }
@@ -70,7 +69,7 @@ function MyScripts() {
       filtered = filtered.filter((script) => script.niche === selectedNiche);
     }
 
-    // Ensure the filtered results are sorted by createdAt (recent first)
+    // Sort by createdAt (recent first)
     filtered = [...filtered].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
@@ -101,22 +100,20 @@ function MyScripts() {
   }
 
   return (
-    <div className="bg-[#EEF5FF]">
-      <div className="container mx-auto p-4 h-[90vh] flex flex-col">
-        {/* <h1 className="text-3xl font-bold mb-6 text-center nav  text-[25px]">
-          My Scripts
-        </h1> */}
-        <div></div>
-        <div className="flex flex-col nav mt-2  text-[13px] md:flex-row items-center justify-between mb-8 gap-4 bg-white border-2 border-gray-200 rounded-lg p-4">
+    // Prevent any horizontal overflow on mobile
+    <div className="bg-[#EEF5FF] min-h-screen overflow-x-hidden">
+      <div className="container mx-auto max-w-full p-4 sm:p-6 lg:p-8 flex flex-col">
+        {/* Filters Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-gray-200 rounded-lg p-4">
           {/* Status Filter Buttons */}
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <div className="gradient-border">
               <button
                 onClick={() => setStatusFilter("all")}
-                className={`px-6   py-2 rounded-[250px] ${
+                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
                   statusFilter === "all"
                     ? "btn text-white"
-                    : " bg-[#EEF5FF] font-bold text-black"
+                    : "bg-[#EEF5FF] font-bold text-black"
                 }`}
               >
                 All
@@ -125,57 +122,56 @@ function MyScripts() {
             <div className="gradient-border">
               <button
                 onClick={() => setStatusFilter("used")}
-                className={`px-4 btn  py-2 rounded-[250px] ${
+                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
                   statusFilter === "used"
                     ? "btn text-white"
-                    : " bg-[#EEF5FF] font-bold text-black"
+                    : "bg-[#EEF5FF] font-bold text-black"
                 }`}
               >
                 Used
               </button>
             </div>
             <div className="gradient-border">
-              {" "}
               <button
                 onClick={() => setStatusFilter("unused")}
-                className={`px-4 btn  py-2 rounded-[250px] ${
+                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
                   statusFilter === "unused"
                     ? "btn text-white"
-                    : " bg-[#EEF5FF] font-bold text-black"
+                    : "bg-[#EEF5FF] font-bold text-black"
                 }`}
               >
                 Unused
-              </button>{" "}
+              </button>
             </div>
           </div>
 
           {/* Date Picker */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="gradient-border">
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 border rounded-[250px] bg-[#EEF5FF] shadow-sm"
+                className="px-3 py-2 border text-[10px] sm:text-[12px] md:text-[13px] rounded-full bg-[#EEF5FF] shadow-sm"
               />
             </div>
             <div className="gradient-border">
               <button
                 onClick={() => setSelectedDate("")}
-                className="px-4 py-2 rounded-[250px] border bg-[#EEF5FF]"
+                className="px-4 py-2 text-[10px] sm:text-[12px] md:text-[13px] rounded-full border bg-[#EEF5FF]"
               >
                 Clear Date Filter
-              </button>{" "}
+              </button>
             </div>
           </div>
 
           {/* Niche Filter Dropdown */}
-          <div className="flex items-center gap-2">
-            <div className="gradient-border ">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="gradient-border">
               <select
                 value={selectedNiche}
                 onChange={(e) => setSelectedNiche(e.target.value)}
-                className="px-3 text-[13px] py-2 border-none focus:outline-none bg-[#EEF5FF] rounded-[250px] shadow-sm"
+                className="px-3 py-2 border text-[10px] sm:text-[12px] md:text-[13px] rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
               >
                 {uniqueNiches.map((niche, index) => (
                   <option key={index} value={niche}>
@@ -187,13 +183,14 @@ function MyScripts() {
           </div>
         </div>
 
+        {/* Scripts Grid */}
         {filteredScripts.length === 0 ? (
           <p className="text-center text-gray-500">
             No scripts match the selected criteria.
           </p>
         ) : (
           <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 mt-[20px] px-5 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-5 px-2 sm:px-5">
               {filteredScripts.map((script) => (
                 <ScriptCard key={script._id} script={script} />
               ))}

@@ -28,24 +28,24 @@ import AdminLayout from "./admin/pages/AdminLayout";
 import AdminPrompts from "./admin/pages/AdminPrompts";
 import AdminOverview from "./admin/pages/AdminOverview";
 import UserManagementPage from "./admin/pages/UserManagementPage";
-import { FaCircle, FaCrown } from "react-icons/fa";
+import { FaCrown } from "react-icons/fa";
 
 function NavBar({ user }) {
   const [userData, setUserData] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const userId2 = localStorage.getItem("userId");
-
-  console.log(userData);
-
+  const location = useLocation();
+  // Fetch user info
   useEffect(() => {
     const fetchUser = async () => {
       const response = await fetch(
         `http://localhost:5000/api/scripts/user/${userId2}`
       );
       const data = await response.json();
-      setUserData(data); // Ensure subscriptionStatus is part of data
+      setUserData(data);
     };
     fetchUser();
-  }, []);
+  }, [userId2]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,42 +53,62 @@ function NavBar({ user }) {
         `http://localhost:5000/api/scripts/user/${userId2}`
       );
       const data = await response.json();
-      setUserData(data); // Ensure subscriptionStatus is part of data
+      setUserData(data);
     };
     const sessionId = new URLSearchParams(window.location.search).get(
       "session_id"
     );
     if (sessionId) {
-      fetchUser(); // Refresh user info after successful subscription
+      fetchUser();
     }
-  }, []);
-
-  const location = useLocation();
+  }, [userId2]);
   // Hide the nav bar on these routes
   const hidePaths = ["/login", "/logout"];
   if (hidePaths.includes(location.pathname)) return null;
-  console.log(user);
 
-  const activeClass = `
-  text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative 
-  after:content-[''] after:absolute after:left-0 after:bottom-[-2px] 
-  after:w-full after:h-[2px] after:rounded-lg 
-  after:bg-gradient-to-r after:from-purple-500 after:to-pink-500
-`;
-
+  const activeClass =
+    "text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative after:content-[''] after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:rounded-lg after:bg-gradient-to-r after:from-purple-500 after:to-pink-500";
   const defaultClass =
     "text-gray-600 hover:text-gray-500 text-[12px] uppercase";
 
   return (
     <nav className="bg-white shadow border border-b-1 p-4">
-      <div className="container mx-auto flex items-center justify-between ">
-        {/* Left: Logo */}
+      <div className="lg:container  mx-auto flex items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="w-[13rem] h-[50px]" />
+          <img
+            src={Logo}
+            alt="Logo"
+            className="w-[6rem] h-[30px]  sm:w-[13rem] sm:h-[50px]"
+          />
         </div>
 
-        {/* Center: Navigation Links */}
-        <div className="flex space-x-4 font-sans font-bold uppercase text-gray-400 ">
+        {/* Hamburger Menu (visible on mobile) */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-gray-600 hover:text-gray-500 focus:outline-none"
+          >
+            <svg className="sm:h-6 h-5 w-6 fill-current" viewBox="0 0 24 24">
+              {menuOpen ? (
+                <path
+                  fillRule="evenodd"
+                  d="M18.364 5.636a1 1 0 010 1.414L13.414 12l4.95 4.95a1 1 0 01-1.414 1.414L12 13.414l-4.95 4.95a1 1 0 01-1.414-1.414L10.586 12 5.636 7.05a1 1 0 011.414-1.414L12 10.586l4.95-4.95a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              ) : (
+                <path
+                  fillRule="evenodd"
+                  d="M4 5h16a1 1 0 010 2H4a1 1 0 010-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2z"
+                  clipRule="evenodd"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Desktop Navigation Links */}
+        <div className="hidden  lg:flex space-x-4 font-sans font-bold uppercase text-gray-400">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -141,8 +161,8 @@ function NavBar({ user }) {
           )}
         </div>
 
-        {/* Right: Tokens, Pro/Upgrade Badge, and Avatar */}
-        <div className="flex items-center space-x-8">
+        {/* Right: Tokens and User Avatar */}
+        <div className="flex items-center lg:space-x-4 space-x-3">
           {user && (
             <NavLink
               to={userData.tokens < 5 ? "/boost-tokens" : "#"}
@@ -154,7 +174,7 @@ function NavBar({ user }) {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
+                className="w-3 sm:w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -166,8 +186,8 @@ function NavBar({ user }) {
 
           <div className="flex items-center space-x-3">
             <UserAvatar />
-            <div className="flex gap-5">
-              <span className="text-black/70 text-[14px] font-semibold">
+            <div className="flex lg:gap-5 gap-2">
+              <span className="text-black/70 hidden sm:flex text-[14px] font-semibold">
                 {user ? user.name : "Guest"}
               </span>
               {userData && (
@@ -193,23 +213,89 @@ function NavBar({ user }) {
         </div>
       </div>
 
+      {/* Mobile Navigation Links */}
+      {menuOpen && (
+        <div className="lg:hidden mt-4">
+          <div className="flex flex-col space-y-2">
+            <NavLink
+              to="/"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to="/generate"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Generate Script
+            </NavLink>
+            <NavLink
+              to="/myscripts"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              My Scripts
+            </NavLink>
+            <NavLink
+              to="/subscription"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Subscription
+            </NavLink>
+            <NavLink
+              to="/boost-tokens"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Boost
+            </NavLink>
+            {user && (user.admin === true || user.admin === "true") && (
+              <NavLink
+                to="/admin"
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  isActive ? `${defaultClass} ${activeClass}` : defaultClass
+                }
+              >
+                Admin
+              </NavLink>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Glow Animation for Pro Badge */}
-      <style>{`
-        @keyframes glow {
-          0% {
-            box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
+      <style>
+        {`
+          @keyframes glow {
+            0% {
+              box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
+            }
+            50% {
+              box-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+            }
+            100% {
+              box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
+            }
           }
-          50% {
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+          .animate-glow {
+            animation: glow 2s infinite ease-in-out;
           }
-          100% {
-            box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
-          }
-        }
-        .animate-glow {
-          animation: glow 2s infinite ease-in-out;
-        }
-      `}</style>
+        `}
+      </style>
     </nav>
   );
 }
