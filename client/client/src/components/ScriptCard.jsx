@@ -38,10 +38,12 @@ function ScriptCard({ script }) {
     >
       {/* Title & Snippet */}
       <div>
-        <h3 className="text-xl font-bold text-gray-800 libre-caslon-display-regular">
+        <h3 className=" font-bold text-gray-800 nav  text-[14px]">
           {script.title}
         </h3>
-        <p className="mt-2 text-gray-600 font-serif ">{script.snippet}....</p>
+        <p className="mt-2 text-gray-600 nav  text-[13px] ">
+          {script.snippet}....
+        </p>
       </div>
 
       {/* Footer: Badges on the left, Buttons on the right */}
@@ -54,15 +56,15 @@ function ScriptCard({ script }) {
           >
             {script.niche.charAt(0).toUpperCase() + script.niche.slice(1)}
           </span>
-          {script.isAdmin && (
+          {/* {script.isAdmin && (
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-200 text-indigo-800">
               Admin
             </span>
-          )}
+          )} */}
           <span
             className={`text-xs font-semibold px-3 py-1 rounded-full ${
               script.status === "used"
-                ? "bg-yellow-200 text-yellow-800"
+                ? "bg-[#ffd200] text-yellow-900"
                 : "bg-green-200 text-green-800"
             }`}
           >
@@ -71,7 +73,7 @@ function ScriptCard({ script }) {
         </div>
 
         {/* Action Button: Admin scripts only allow Download; non-admin follow normal logic */}
-        {script.isAdmin ? (
+        {/* {script.isAdmin ? (
           <button
             onClick={handleDownload}
             className="bg-green-500 hover:bg-green-600 text-white font-semibold text-[12px] px-4 py-2 font-serif rounded-lg transition duration-200"
@@ -92,7 +94,7 @@ function ScriptCard({ script }) {
           >
             Download
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

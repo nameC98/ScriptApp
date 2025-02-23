@@ -81,11 +81,11 @@ function Dashboard() {
   ];
 
   return (
-    <div className=" bg-gray-100 p-6 h-[90vh]">
+    <div className=" bg-gray-100 fonts p-6 h-[90vh]">
       <div className="container mx-auto">
-        <h1 className="text-3xl md:text-3xl font-bold libre-caslon-display-regular text-center mb-8">
+        {/* <h1 className="text-3xl md:text-3xl font-bold libre-caslon-display-regular text-center mb-8">
           Script Dashboard
-        </h1>
+        </h1> */}
 
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white shadow-lg rounded-lg p-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -93,30 +93,30 @@ function Dashboard() {
             <div className="flex space-x-2">
               <button
                 onClick={() => setStatusFilter("all")}
-                className={`px-4 py-2 rounded-lg ${
+                className={`px-4 py-2   nav  text-[13px] rounded-[250px] ${
                   statusFilter === "all"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-gray-700 text-white"
+                    : " bg-gray-400 font-bold text-white"
                 }`}
               >
                 All
               </button>
               <button
                 onClick={() => setStatusFilter("used")}
-                className={`px-4 py-2 rounded-lg ${
+                className={`px-4 py-2 nav  text-[13px] rounded-[250px] ${
                   statusFilter === "used"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-gray-700 text-white"
+                    : " bg-gray-400 font-bold text-white"
                 }`}
               >
                 Used
               </button>
               <button
                 onClick={() => setStatusFilter("unused")}
-                className={`px-4 py-2 rounded-lg ${
+                className={`px-4 nav  text-[13px] py-2 rounded-[250px]  ${
                   statusFilter === "unused"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-gray-700 text-white"
+                    : " bg-gray-400 font-bold text-white"
                 }`}
               >
                 Unused
@@ -129,11 +129,11 @@ function Dashboard() {
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-3 py-2 border rounded-lg shadow-sm"
+                className="px-3 py-2 border nav  text-[13px] rounded-lg shadow-sm"
               />
               <button
                 onClick={() => setDateFilter("")}
-                className="px-4 py-2 rounded-lg border border-gray-300"
+                className="px-4 py-2 nav  text-[13px] rounded-lg border border-gray-300"
               >
                 Clear Date Filter
               </button>
@@ -142,14 +142,17 @@ function Dashboard() {
 
           {/* Niche Filter Dropdown */}
           <div className="flex items-center gap-2">
-            <label htmlFor="nicheFilter" className="text-lg font-medium">
+            <label
+              htmlFor="nicheFilter"
+              className=" nav  text-[13px] font-medium"
+            >
               Filter by Niche:
             </label>
             <select
               id="nicheFilter"
               value={nicheFilter}
               onChange={(e) => setNicheFilter(e.target.value)}
-              className="px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 font-bold focus:ring-blue-400"
+              className="px-4 py-1 rounded-[250px] border nav  text-[13px] border-gray-300 focus:outline-none focus:ring-2 font-bold focus:ring-blue-400"
             >
               {uniqueNiches.map((niche, index) => (
                 <option key={index} value={niche}>
@@ -163,11 +166,13 @@ function Dashboard() {
         </div>
 
         {isLoading ? (
-          <p className="text-center font-serif">Loading scripts...</p>
+          <p className="text-center nav  text-black/70 text-[13px]">
+            Loading scripts...
+          </p>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : scripts.length === 0 ? (
-          <p className="text-center font-serif">
+          <p className="text-center nav text-black/70  text-[13px]">
             No scripts found for the selected filters.
           </p>
         ) : (

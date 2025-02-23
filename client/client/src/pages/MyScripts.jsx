@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ScriptCard from "./components/ScriptCard";
+import ScriptCard from "../components/ScriptCard";
 
 function MyScripts() {
   const [scripts, setScripts] = useState([]);
@@ -103,37 +103,39 @@ function MyScripts() {
   return (
     <div className="bg-gray-100">
       <div className="container mx-auto p-4 h-[90vh] flex flex-col">
-        <h1 className="text-3xl font-bold mb-6 text-center">My Scripts</h1>
+        {/* <h1 className="text-3xl font-bold mb-6 text-center nav  text-[25px]">
+          My Scripts
+        </h1> */}
         <div></div>
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-white shadow-lg rounded-lg p-4 ">
+        <div className="flex flex-col nav mt-2  text-[13px] md:flex-row items-center justify-between mb-8 gap-4 bg-white shadow-lg rounded-lg p-4">
           {/* Status Filter Buttons */}
           <div className="flex space-x-2">
             <button
               onClick={() => setStatusFilter("all")}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4   py-2 rounded-[250px] ${
                 statusFilter === "all"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
+                  ? "bg-gray-700 text-white"
+                  : " bg-gray-400 font-bold text-white"
               }`}
             >
               All
             </button>
             <button
               onClick={() => setStatusFilter("used")}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-[250px] ${
                 statusFilter === "used"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
+                  ? "bg-gray-700 text-white"
+                  : " bg-gray-400 font-bold text-white"
               }`}
             >
               Used
             </button>
             <button
               onClick={() => setStatusFilter("unused")}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-[250px] ${
                 statusFilter === "unused"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
+                  ? "bg-gray-700 text-white"
+                  : " bg-gray-400 font-bold text-white"
               }`}
             >
               Unused
@@ -146,11 +148,11 @@ function MyScripts() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 border rounded-lg shadow-sm"
+              className="px-3 py-2 border rounded-[250px] shadow-sm"
             />
             <button
               onClick={() => setSelectedDate("")}
-              className="px-4 py-2 rounded-lg border border-gray-300"
+              className="px-4 py-2 rounded-[250px] border border-gray-300"
             >
               Clear Date Filter
             </button>
@@ -161,7 +163,7 @@ function MyScripts() {
             <select
               value={selectedNiche}
               onChange={(e) => setSelectedNiche(e.target.value)}
-              className="px-3 py-2 border rounded-lg shadow-sm"
+              className="px-3 text-[13px] py-2 border rounded-[250px] shadow-sm"
             >
               {uniqueNiches.map((niche, index) => (
                 <option key={index} value={niche}>

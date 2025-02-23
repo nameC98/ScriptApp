@@ -71,7 +71,7 @@ const authMiddleware = (req, res, next) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     // Use req.user.userId instead of req.user.id
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.userId).select("+admin");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -80,6 +80,7 @@ router.get("/me", authMiddleware, async (req, res) => {
       name: user.name,
       tokens: user.tokens,
       email: user.email,
+      admin: user.admin,
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });

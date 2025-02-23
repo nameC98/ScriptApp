@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Modal from "./Modal";
+import Modal from "../components/Modal";
 
 function CustomScriptForm() {
   const [niche, setNiche] = useState("");
@@ -15,6 +15,7 @@ function CustomScriptForm() {
   // Modal state for prompt style selection
   const [showPromptStyleModal, setShowPromptStyleModal] = useState(false);
   const [availablePrompts, setAvailablePrompts] = useState([]);
+  const userId2 = localStorage.getItem("userId");
 
   const navigate = useNavigate();
 
@@ -34,7 +35,7 @@ function CustomScriptForm() {
 
     // Prepare the payload – note that style now comes from our prompt selection.
     const payload = {
-      userId: "67af2392fdbd996fca933a22", // Replace with dynamic user ID
+      userId: userId2, // Replace with dynamic user ID
       niche,
       title: topic,
       style: selectedPromptStyle,
@@ -107,7 +108,7 @@ function CustomScriptForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="h-[90vh] nav  text-[13px] bg-gray-100 flex items-center justify-center p-6">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Generate Custom Script
@@ -125,7 +126,7 @@ function CustomScriptForm() {
               id="niche"
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
             >
               <option value="">Select Niche</option>
               <option value="tech">Tech</option>
@@ -148,7 +149,7 @@ function CustomScriptForm() {
               id="length"
               value={length}
               onChange={(e) => setLength(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
             >
               <option value="">Select Length</option>
               <option value="short">Short (1-2 minutes)</option>
@@ -171,7 +172,7 @@ function CustomScriptForm() {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Enter topic or title"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
             />
           </div>
 
@@ -187,7 +188,7 @@ function CustomScriptForm() {
               id="channel"
               value={channel}
               onChange={(e) => setChannel(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
             >
               <option value="">Select Channel</option>
               <option value="MKBHD">MKBHD</option>
@@ -207,12 +208,12 @@ function CustomScriptForm() {
                 value={selectedPromptStyle}
                 readOnly
                 placeholder="No prompt style selected"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-yellow-400"
               />
               <button
                 type="button"
                 onClick={openPromptStyleModal}
-                className="ml-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                className="ml-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
               >
                 {selectedPromptStyle ? "Change Prompt" : "Select Prompt"}
               </button>
@@ -224,7 +225,7 @@ function CustomScriptForm() {
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-md transition duration-200"
+              className="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 rounded-md transition duration-200"
             >
               {isGenerating ? "Generating..." : "Generate Script"}
             </button>
@@ -237,8 +238,8 @@ function CustomScriptForm() {
       {/* Modal for Prompt Style Selection */}
       {showPromptStyleModal && (
         <Modal onClose={() => setShowPromptStyleModal(false)}>
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          <div className="p-6 nav text-[13px]">
+            <h2 className="text-2xl text-black/70 font-bold mb-4 text-gray-800">
               Choose a Prompt Style for {niche}
             </h2>
             {availablePrompts.length > 0 ? (
@@ -252,8 +253,9 @@ function CustomScriptForm() {
                     <h3 className="text-lg font-semibold mb-2">
                       {prompt.style}
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      {prompt.promptTemplate.substring(0, 100)}...
+                    <p className="text-[12px] text-gray-600">
+                      {/* {prompt.promptTemplate.substring(0, 100)}... */}
+                      {prompt.promptTemplate}
                     </p>
                   </div>
                 ))}

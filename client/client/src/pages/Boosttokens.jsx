@@ -47,10 +47,10 @@ export default function BoostTokens() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="h-[90vh] nav  bg-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 text-center">
-        <h1 className="text-2xl font-extrabold text-gray-900 mb-4 flex items-center justify-center gap-2">
-          <FaBolt className="text-yellow-500" />
+        <h1 className="text-2xl font-bold  mb-4 flex items-center justify-center text-gray-600 gap-2">
+          <FaBolt className="text-gray-600 " />
           Boost Your Tokens
         </h1>
         <p className="text-gray-600 mb-6">
@@ -67,7 +67,7 @@ export default function BoostTokens() {
         <button
           onClick={handleBoost}
           disabled={loading}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-6 rounded-md shadow w-full transition-colors"
+          className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-md shadow w-full transition-colors"
         >
           {loading ? "Processing..." : "Boost Tokens"}
         </button>

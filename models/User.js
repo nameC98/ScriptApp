@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true }, // <-- Added name field
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
+    admin: { type: Boolean, default: false },
     subscriptionStatus: { type: String, default: "inactive" }, // active/inactive
     tokens: { type: Number, default: 100 },
     usedScripts: { type: [String], default: [] },

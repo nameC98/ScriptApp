@@ -49,9 +49,9 @@ export default function Subscription() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="h-[90vh] nav text-[13px] bg-gray-100 flex items-center justify-center p-6">
       {/* Outer container to center the card */}
-      <div className="relative w-80 bg-gray-900 text-white rounded-xl shadow-2xl p-6">
+      <div className="relative w-80 bg-gray-900 text-white rounded-xl shadow-2xl py-[6rem] px-6">
         {/* Corner circles */}
         <div className="absolute top-0 left-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
         <div className="absolute top-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
@@ -59,7 +59,7 @@ export default function Subscription() {
         <div className="absolute bottom-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
 
         {/* PRO badge */}
-        <span className="absolute top-4 right-4 bg-orange-500 text-xs font-bold px-2 py-1 rounded-full uppercase">
+        <span className="absolute top-4 right-4 bg-yellow-600 text-xs font-bold px-2 py-1 rounded-full uppercase">
           Pro
         </span>
 
@@ -83,7 +83,7 @@ export default function Subscription() {
         <button
           onClick={handleSubscribe}
           disabled={loading}
-          className="w-full mt-4 bg-white text-gray-900 font-semibold py-2 rounded-md hover:bg-gray-100 transition-colors disabled:opacity-50"
+          className="w-full mt-4 bg-white nav  font-bold text-gray-900  py-2 rounded-md hover:bg-gray-100 transition-colors disabled:opacity-50"
         >
           {loading ? "Processing..." : "Upgrade Plan"}
         </button>
@@ -91,19 +91,19 @@ export default function Subscription() {
         {/* Features */}
         <ul className="mt-6 space-y-3 text-sm">
           <li className="flex items-start">
-            <FaCheck className="text-green-400 mr-2 mt-1" />
+            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
             Unlimited script downloads
           </li>
           <li className="flex items-start">
-            <FaCheck className="text-green-400 mr-2 mt-1" />
+            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
             100 tokens monthly for generating & rephrasing
           </li>
           <li className="flex items-start">
-            <FaCheck className="text-green-400 mr-2 mt-1" />
+            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
             No hidden fees
           </li>
           <li className="flex items-start">
-            <FaCheck className="text-green-400 mr-2 mt-1" />
+            <FaCheck className="text-green-400  nav  mr-2 mt-1" />
             Cancel anytime
           </li>
         </ul>
