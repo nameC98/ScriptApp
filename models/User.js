@@ -4,15 +4,18 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // <-- Added name field
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
     admin: { type: Boolean, default: false },
     subscriptionStatus: { type: String, default: "inactive" }, // active/inactive
     tokens: { type: Number, default: 100 },
     usedScripts: { type: [String], default: [] },
+    // New fields to track plan activation and deactivation dates:
+    planActivatedAt: { type: Date, default: null },
+    planDeactivatedAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true } // This automatically adds createdAt and updatedAt
 );
 
 // Hash password before saving

@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import subscriptionRoutes from "./routes/scription.js";
 import scriptRoutes from "./routes/script.js";
 import tokenRoutes from "./routes/token.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/scripts", scriptRoutes);
 app.use("/api/tokens", tokenRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Connect to MongoDB
 mongoose

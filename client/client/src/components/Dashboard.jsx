@@ -81,59 +81,70 @@ function Dashboard() {
   ];
 
   return (
-    <div className=" bg-gray-100 fonts p-6 h-[90vh]">
+    <div className=" bg-[#EEF5FF] fonts p-6 h-[90vh]">
       <div className="container mx-auto">
         {/* <h1 className="text-3xl md:text-3xl font-bold libre-caslon-display-regular text-center mb-8">
           Script Dashboard
         </h1> */}
 
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white shadow-lg rounded-lg p-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border-[1px] border-gray-300 rounded-xl p-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             {/* Status Filter Buttons */}
             <div className="flex space-x-2">
-              <button
-                onClick={() => setStatusFilter("all")}
-                className={`px-4 py-2   nav  text-[13px] rounded-[250px] ${
-                  statusFilter === "all"
-                    ? "bg-gray-700 text-white"
-                    : " bg-gray-400 font-bold text-white"
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setStatusFilter("used")}
-                className={`px-4 py-2 nav  text-[13px] rounded-[250px] ${
-                  statusFilter === "used"
-                    ? "bg-gray-700 text-white"
-                    : " bg-gray-400 font-bold text-white"
-                }`}
-              >
-                Used
-              </button>
-              <button
-                onClick={() => setStatusFilter("unused")}
-                className={`px-4 nav  text-[13px] py-2 rounded-[250px]  ${
-                  statusFilter === "unused"
-                    ? "bg-gray-700 text-white"
-                    : " bg-gray-400 font-bold text-white"
-                }`}
-              >
-                Unused
-              </button>
+              <div className="gradient-border">
+                <button
+                  onClick={() => setStatusFilter("all")}
+                  className={`px-5 py-1 rounded-full  btn nav  text-[13px] ${
+                    statusFilter === "all"
+                      ? "btn text-white"
+                      : " bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  All
+                </button>
+              </div>
+              <div className="gradient-border">
+                <button
+                  onClick={() => setStatusFilter("used")}
+                  className={`px-4 py-2 nav btn text-[13px] rounded-[250px] ${
+                    statusFilter === "used"
+                      ? "btn text-white"
+                      : " bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  Used
+                </button>
+              </div>
+              <div className="gradient-border">
+                <button
+                  onClick={() => setStatusFilter("unused")}
+                  className={`px-4 nav  text-[13px] btn py-2 rounded-[250px]  ${
+                    statusFilter === "unused"
+                      ? "btn text-white"
+                      : " bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  Unused
+                </button>
+              </div>
             </div>
-
-            {/* Date Picker */}
-            <div className="flex items-center gap-2">
+          </div>
+          {/* Date Picker */}
+          <div className="flex  items-center gap-2">
+            <div className="gradient-border">
+              {" "}
               <input
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-3 py-2 border nav  text-[13px] rounded-lg shadow-sm"
+                className="px-3 py-2 bg-[#EEF5FF] border nav outline-none border-none  btn  text-[13px] rounded-lg shadow-sm"
               />
+            </div>
+            <div className="gradient-border">
+              {" "}
               <button
                 onClick={() => setDateFilter("")}
-                className="px-4 py-2 nav  text-[13px] rounded-lg border border-gray-300"
+                className="px-4 py-2 nav  text-[13px] btn bg-[#EEF5FF] rounded-lg border "
               >
                 Clear Date Filter
               </button>
@@ -148,20 +159,23 @@ function Dashboard() {
             >
               Filter by Niche:
             </label>
-            <select
-              id="nicheFilter"
-              value={nicheFilter}
-              onChange={(e) => setNicheFilter(e.target.value)}
-              className="px-4 py-1 rounded-[250px] border nav  text-[13px] border-gray-300 focus:outline-none focus:ring-2 font-bold focus:ring-blue-400"
-            >
-              {uniqueNiches.map((niche, index) => (
-                <option key={index} value={niche}>
-                  {niche === "all"
-                    ? "All"
-                    : niche.charAt(0).toUpperCase() + niche.slice(1)}
-                </option>
-              ))}
-            </select>
+            <div className="gradient-border ">
+              {" "}
+              <select
+                id="nicheFilter"
+                value={nicheFilter}
+                onChange={(e) => setNicheFilter(e.target.value)}
+                className="px-4 py-1 rounded-[250px] border nav  text-[13px] bg-[#EEF5FF]  focus:outline-none  font-bold focus:ring-0"
+              >
+                {uniqueNiches.map((niche, index) => (
+                  <option key={index} value={niche}>
+                    {niche === "all"
+                      ? "All"
+                      : niche.charAt(0).toUpperCase() + niche.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

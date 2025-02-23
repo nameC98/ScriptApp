@@ -19,6 +19,16 @@ function AdminLayout() {
             Dashboard
           </NavLink>
           <NavLink
+            to="/admin/users"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-600 border-b-2 border-blue-600 pb-2"
+                : "text-gray-600 hover:text-blue-600 pb-2"
+            }
+          >
+            Users
+          </NavLink>
+          <NavLink
             to="/admin/prompts"
             className={({ isActive }) =>
               isActive
@@ -28,6 +38,17 @@ function AdminLayout() {
           >
             Prompts
           </NavLink>
+          <NavLink
+            to="/admin/adminoverview"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-600 border-b-2 border-blue-600 pb-2"
+                : "text-gray-600 hover:text-blue-600 pb-2"
+            }
+          >
+            OverView
+          </NavLink>
+
           {/* Add additional admin links here */}
         </div>
       </nav>

@@ -130,7 +130,24 @@ function ScriptDetailPage() {
     setShowStyleModal(true);
   };
 
+  // Updated: Check subscription status before rephrasing
   const handleSelectPrompt = async (prompt) => {
+    // Check user's subscription status first
+    try {
+      const statusResponse = await fetch(
+        `http://localhost:5000/api/subscription/status?userId=${userId2}`
+      );
+      const statusData = await statusResponse.json();
+      if (statusData.subscriptionStatus !== "active") {
+        toast.error("Please activate your plan to rephrase a script.");
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking subscription status for rephrase:", err);
+      toast.error("Error checking subscription status.");
+      return;
+    }
+
     setRephraseLoading(true);
     try {
       const userId = userId2;

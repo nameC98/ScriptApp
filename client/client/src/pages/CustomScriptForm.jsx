@@ -11,7 +11,6 @@ function CustomScriptForm() {
   const [generatedScript, setGeneratedScript] = useState(null);
   const [error, setError] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-
   // Modal state for prompt style selection
   const [showPromptStyleModal, setShowPromptStyleModal] = useState(false);
   const [availablePrompts, setAvailablePrompts] = useState([]);
@@ -19,7 +18,7 @@ function CustomScriptForm() {
 
   const navigate = useNavigate();
 
-  // When the form is submitted, send payload including the chosen prompt style.
+  // When the form is submitted, first check if the user's subscription is active.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -31,11 +30,27 @@ function CustomScriptForm() {
       return;
     }
 
+    // Check user's subscription status before generating the script.
+    try {
+      const statusResponse = await fetch(
+        `http://localhost:5000/api/subscription/status?userId=${userId2}`
+      );
+      const statusData = await statusResponse.json();
+      if (statusData.subscriptionStatus !== "active") {
+        setError("Please activate your plan to generate a script.");
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking subscription status:", err);
+      setError("Error checking subscription status.");
+      return;
+    }
+
     setIsGenerating(true);
 
     // Prepare the payload – note that style now comes from our prompt selection.
     const payload = {
-      userId: userId2, // Replace with dynamic user ID
+      userId: userId2, // Replace with dynamic user ID if needed
       niche,
       title: topic,
       style: selectedPromptStyle,
@@ -45,7 +60,6 @@ function CustomScriptForm() {
           : length === "medium"
           ? "3-5 minutes"
           : "6+ minutes",
-      // Optionally include channel if needed.
     };
 
     console.log("Payload being sent:", payload);
@@ -108,7 +122,7 @@ function CustomScriptForm() {
   };
 
   return (
-    <div className="h-[90vh] nav  text-[13px] bg-gray-100 flex items-center justify-center p-6">
+    <div className="h-[90vh] nav text-[13px] bg-[#EEF5FF] flex items-center justify-center p-6">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-2xl">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Generate Custom Script
@@ -213,7 +227,7 @@ function CustomScriptForm() {
               <button
                 type="button"
                 onClick={openPromptStyleModal}
-                className="ml-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                className="ml-3 gradient-button  text-white font-semibold py-2 px-4 rounded-md transition duration-200"
               >
                 {selectedPromptStyle ? "Change Prompt" : "Select Prompt"}
               </button>
@@ -225,7 +239,7 @@ function CustomScriptForm() {
             <button
               type="submit"
               disabled={isGenerating}
-              className="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 rounded-md transition duration-200"
+              className="w-full gradient-button text-white font-semibold py-3 rounded-md transition duration-200"
             >
               {isGenerating ? "Generating..." : "Generate Script"}
             </button>
@@ -254,7 +268,6 @@ function CustomScriptForm() {
                       {prompt.style}
                     </h3>
                     <p className="text-[12px] text-gray-600">
-                      {/* {prompt.promptTemplate.substring(0, 100)}... */}
                       {prompt.promptTemplate}
                     </p>
                   </div>

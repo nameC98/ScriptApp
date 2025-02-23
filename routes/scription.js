@@ -148,6 +148,8 @@ router.post(
         // This is the monthly subscription
         user.subscriptionStatus = "active";
         user.tokens = 100;
+        user.planActivatedAt = new Date(); // Record activation date
+        user.planDeactivatedAt = null;
         await user.save();
         console.log(`Subscription activated for user: ${user.email}`);
       } else if (session.mode === "payment") {
@@ -188,17 +190,20 @@ router.get("/status", async (req, res) => {
 /**
  * Endpoint to check subscription status and token balance.
  */
-router.get("/status", async (req, res) => {
-  const { userId } = req.query;
+// Activate subscription: sets status to active, resets tokens, and records activation date
+router.post("/start", async (req, res) => {
+  const { userId } = req.body;
   try {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({
-      subscriptionStatus: user.subscriptionStatus,
-      tokens: user.tokens,
-    });
+    user.subscriptionStatus = "active";
+    user.tokens = 100; // Reset tokens for the month
+    user.planActivatedAt = new Date(); // Track activation date
+    user.planDeactivatedAt = null; // Clear deactivation date if needed
+    await user.save();
+    res.json({ message: "Subscription activated", tokens: user.tokens });
   } catch (error) {
-    console.error("Error fetching subscription status:", error);
+    console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });

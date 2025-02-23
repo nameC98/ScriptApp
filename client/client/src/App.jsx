@@ -26,27 +26,69 @@ import Logo from "./assets/logo.png";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminLayout from "./admin/pages/AdminLayout";
 import AdminPrompts from "./admin/pages/AdminPrompts";
+import AdminOverview from "./admin/pages/AdminOverview";
+import UserManagementPage from "./admin/pages/UserManagementPage";
+import { FaCircle, FaCrown } from "react-icons/fa";
 
 function NavBar({ user }) {
+  const [userData, setUserData] = useState([]);
+  const userId2 = localStorage.getItem("userId");
+
+  console.log(userData);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch(
+        `http://localhost:5000/api/scripts/user/${userId2}`
+      );
+      const data = await response.json();
+      setUserData(data); // Ensure subscriptionStatus is part of data
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await fetch(
+        `http://localhost:5000/api/scripts/user/${userId2}`
+      );
+      const data = await response.json();
+      setUserData(data); // Ensure subscriptionStatus is part of data
+    };
+    const sessionId = new URLSearchParams(window.location.search).get(
+      "session_id"
+    );
+    if (sessionId) {
+      fetchUser(); // Refresh user info after successful subscription
+    }
+  }, []);
+
   const location = useLocation();
   // Hide the nav bar on these routes
   const hidePaths = ["/login", "/logout"];
   if (hidePaths.includes(location.pathname)) return null;
   console.log(user);
 
-  const activeClass = "text-gray-600 tracking-widest font-extrabold";
-  const defaultClass = "text-black/70 hover:text-gray-500 text-[14px]";
+  const activeClass = `
+  text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative 
+  after:content-[''] after:absolute after:left-0 after:bottom-[-2px] 
+  after:w-full after:h-[2px] after:rounded-lg 
+  after:bg-gradient-to-r after:from-purple-500 after:to-pink-500
+`;
+
+  const defaultClass =
+    "text-gray-600 hover:text-gray-500 text-[12px] uppercase";
 
   return (
     <nav className="bg-white shadow border border-b-1 p-4">
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container mx-auto flex items-center justify-between ">
         {/* Left: Logo */}
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="w-[13rem] h-[50px]" />
         </div>
 
         {/* Center: Navigation Links */}
-        <div className="flex space-x-4 font-sans font-bold text-gray-400">
+        <div className="flex space-x-4 font-sans font-bold uppercase text-gray-400 ">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -87,36 +129,87 @@ function NavBar({ user }) {
           >
             Boost
           </NavLink>
-          {/* Conditional Admin Link */}
           {user && (user.admin === true || user.admin === "true") && (
-            <NavLink to="/admin">Admin</NavLink>
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Admin
+            </NavLink>
           )}
         </div>
 
-        {/* Right: Tokens and Avatar */}
+        {/* Right: Tokens, Pro/Upgrade Badge, and Avatar */}
         <div className="flex items-center space-x-8">
           {user && (
-            <div className="flex items-center space-x-2 bg-yellow-600 text-white text-[14px] px-3 py-1 rounded-full shadow border border-gray-200">
+            <NavLink
+              to={userData.tokens < 5 ? "/boost-tokens" : "#"}
+              className={`flex items-center space-x-2 px-3 py-1 rounded-full text-white text-[14px] shadow border border-gray-200 ${
+                userData.tokens < 5
+                  ? "bg-gradient-to-r from-yellow-400 to-red-500 animate-pulse hover:scale-105 transition-transform"
+                  : "bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-lg"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-5 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
-                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 2.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11z" />
-                <path d="M10 7a3 3 0 100 6 3 3 0 000-6z" />
+                <path d="M11 0L3 10h5l-1 10 8-12h-5z" />
               </svg>
               <span className="font-bold text-white">{user.tokens}</span>
-            </div>
+            </NavLink>
           )}
-          <div className="flex items-center">
+
+          <div className="flex items-center space-x-3">
             <UserAvatar />
-            <span className="text-black/70 px-3 py-1 text-[14px] font-semibold">
-              {user ? user.name : "Guest"}
-            </span>
+            <div className="flex gap-5">
+              <span className="text-black/70 text-[14px] font-semibold">
+                {user ? user.name : "Guest"}
+              </span>
+              {userData && (
+                <div className="flex items-center space-x-2">
+                  {userData.subscriptionStatus === "active" ? (
+                    <div className="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-lg ">
+                      <FaCrown className="mr-1 text-yellow-300" />
+                      Pro
+                    </div>
+                  ) : (
+                    <NavLink
+                      to="/subscription"
+                      className="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-red-500 text-white text-xs font-semibold shadow-lg animate-pulse hover:scale-105 transition-transform"
+                    >
+                      <FaCrown className="mr-1 text-white" />
+                      Upgrade to Pro
+                    </NavLink>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Glow Animation for Pro Badge */}
+      <style>{`
+        @keyframes glow {
+          0% {
+            box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+          }
+          100% {
+            box-shadow: 0 0 5px rgba(236, 72, 153, 0.4);
+          }
+        }
+        .animate-glow {
+          animation: glow 2s infinite ease-in-out;
+        }
+      `}</style>
     </nav>
   );
 }
@@ -178,6 +271,8 @@ function App() {
               <Route path="/admin/*" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="prompts" element={<AdminPrompts />} />
+                <Route path="adminoverview" element={<AdminOverview />} />
+                <Route path="users" element={<UserManagementPage />} />
                 {/* Add additional nested admin routes here */}
               </Route>
             )}
