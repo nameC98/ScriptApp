@@ -241,7 +241,7 @@ const UserManagementPage = () => {
                         ? new Date(user.planDeactivatedAt).toLocaleDateString()
                         : "N/A"}
                     </td>
-                    <td className="py-2 px-4 border text-sm space-y-2 sm:space-y-0 sm:space-x-2">
+                    <td className="py-2 px-4 border text-sm space-y-2 sm:space-x-2">
                       <button
                         className="bg-blue-500 text-white py-1 px-2 rounded text-xs sm:text-sm"
                         onClick={() => handleResetTokens(user._id)}

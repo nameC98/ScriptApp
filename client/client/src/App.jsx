@@ -29,6 +29,9 @@ import AdminPrompts from "./admin/pages/AdminPrompts";
 import AdminOverview from "./admin/pages/AdminOverview";
 import UserManagementPage from "./admin/pages/UserManagementPage";
 import { FaCrown } from "react-icons/fa";
+import PromptsPage from "./pages/Prompts";
+import PromptDetailPage from "./pages/PromptDetailPage";
+import CreatePromptPage from "./pages/CreatePromptPage";
 
 function NavBar({ user }) {
   const [userData, setUserData] = useState([]);
@@ -149,6 +152,15 @@ function NavBar({ user }) {
           >
             Boost
           </NavLink>
+          <NavLink
+            to="/prompts"
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) =>
+              isActive ? `${defaultClass} ${activeClass}` : defaultClass
+            }
+          >
+            Prompts
+          </NavLink>
           {user && (user.admin === true || user.admin === "true") && (
             <NavLink
               to="/admin"
@@ -262,6 +274,16 @@ function NavBar({ user }) {
             >
               Boost
             </NavLink>
+            <NavLink
+              to="/prompts"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Prompts
+            </NavLink>
+
             {user && (user.admin === true || user.admin === "true") && (
               <NavLink
                 to="/admin"
@@ -352,6 +374,9 @@ function App() {
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/prompts" element={<PromptsPage />} />
+            <Route path="/prompts/:id" element={<PromptDetailPage />} />
+            <Route path="/create-prompt" element={<CreatePromptPage />} />
             {/* Admin Routes (visible only if user is admin) */}
             {user && (user.admin === true || user.admin === "true") && (
               <Route path="/admin/*" element={<AdminLayout />}>

@@ -20,10 +20,6 @@ const client = new OpenAI({
   apiKey: token,
 });
 
-//
-// === Static Routes (Non-dynamic) ===
-//
-
 // GET: Fetch all scripts (for testing purposes)
 router.get("/", async (req, res) => {
   try {
@@ -38,16 +34,13 @@ router.get("/", async (req, res) => {
 // GET: Fetch scripts for a specific user, with optional date filtering
 router.get("/my-scripts/:userId", async (req, res) => {
   const { userId } = req.params;
-  // Optional query parameters: startDate and endDate (in YYYY-MM-DD format)
   const { startDate, endDate } = req.query;
   let filter = { userId };
-
   if (startDate || endDate) {
     filter.createdAt = {};
     if (startDate) filter.createdAt.$gte = new Date(startDate);
     if (endDate) filter.createdAt.$lte = new Date(endDate);
   }
-
   try {
     const scripts = await Script.find(filter);
     if (!scripts.length) {
@@ -57,6 +50,17 @@ router.get("/my-scripts/:userId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching user scripts:", error);
     res.status(500).json({ error: "Error fetching user scripts" });
+  }
+});
+
+router.get("/prompts", async (req, res) => {
+  try {
+    // Your logic to fetch prompts (admin and/or user prompts)
+    const prompts = await Prompt.find();
+    res.json(prompts);
+  } catch (error) {
+    console.error("Error fetching prompts:", error);
+    res.status(500).json({ error: "Error fetching prompts" });
   }
 });
 
@@ -71,21 +75,27 @@ router.get("/public", async (req, res) => {
     res.status(500).json({ error: "Error fetching admin scripts" });
   }
 });
-
-//
-// === Prompt Template Endpoints ===
-//
-
-// POST: Create a new prompt template
+// POST: Create a new prompt template (admin creation)
 router.post("/prompt", async (req, res) => {
   const { niche, style, promptTemplate } = req.body;
+  console.log("Received data:", req.body); // Debug log
+
   if (!niche || !style || !promptTemplate) {
     return res.status(400).json({
       error: "Missing required fields: niche, style, and promptTemplate",
     });
   }
+
   try {
-    const newPrompt = new Prompt({ niche, style, promptTemplate });
+    const newPrompt = new Prompt({
+      niche,
+      style,
+      promptTemplate,
+      is_admin: true,
+    });
+
+    console.log("Saving prompt:", newPrompt); // Debug log
+
     await newPrompt.save();
     res.json({
       message: "Prompt template saved successfully",
@@ -97,7 +107,7 @@ router.post("/prompt", async (req, res) => {
   }
 });
 
-// PATCH: Edit an existing prompt template
+// PATCH: Edit an existing prompt template (admin update)
 router.patch("/prompt/:id", async (req, res) => {
   const { id } = req.params;
   const { niche, style, promptTemplate } = req.body;
@@ -122,7 +132,7 @@ router.patch("/prompt/:id", async (req, res) => {
   }
 });
 
-// DELETE: Delete a prompt template
+// DELETE: Delete a prompt template (admin delete)
 router.delete("/prompt/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -137,14 +147,384 @@ router.delete("/prompt/:id", async (req, res) => {
   }
 });
 
-// GET: Retrieve all prompt templates
-router.get("/prompts", async (req, res) => {
+// POST: Create a new user prompt template
+router.post("/prompts", async (req, res) => {
+  const { niche, style, promptTemplate, userId } = req.body;
+  if (!niche || !style || !promptTemplate || !userId) {
+    return res.status(400).json({
+      error:
+        "Missing required fields: niche, style, promptTemplate, and userId",
+    });
+  }
   try {
-    const prompts = await Prompt.find();
-    res.json(prompts);
+    const newPrompt = new Prompt({
+      niche,
+      style,
+      promptTemplate,
+      created_by: userId,
+      is_admin: false, // User-created prompt
+    });
+    await newPrompt.save();
+    res.json({
+      message: "Prompt template saved successfully",
+      prompt: newPrompt,
+    });
   } catch (error) {
-    console.error("Error fetching prompts:", error);
-    res.status(500).json({ error: "Error fetching prompts" });
+    console.error("Error saving prompt template:", error);
+    res.status(500).json({ error: "Error saving prompt template" });
+  }
+});
+
+// PATCH: Edit a user prompt template (only if owned by the user)
+router.patch("/prompts/:id", async (req, res) => {
+  const { id } = req.params;
+  const { niche, style, promptTemplate, userId } = req.body;
+  if (!niche || !style || !promptTemplate || !userId) {
+    return res.status(400).json({
+      error:
+        "Missing required fields: niche, style, promptTemplate, and userId",
+    });
+  }
+  try {
+    const prompt = await Prompt.findById(id);
+    if (!prompt) {
+      return res.status(404).json({ error: "Prompt not found" });
+    }
+    // Only allow edit if the prompt is user-created and owned by the user
+    if (prompt.is_admin || prompt.created_by.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to edit this prompt" });
+    }
+    prompt.niche = niche;
+    prompt.style = style;
+    prompt.promptTemplate = promptTemplate;
+    await prompt.save();
+    res.json({ message: "Prompt updated successfully", prompt });
+  } catch (error) {
+    console.error("Error updating prompt:", error);
+    res.status(500).json({ error: "Error updating prompt" });
+  }
+});
+
+// DELETE: Delete a user prompt template (only if owned by the user)
+router.delete("/prompts/:id", async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  try {
+    const prompt = await Prompt.findById(id);
+    if (!prompt) {
+      return res.status(404).json({ error: "Prompt not found" });
+    }
+    if (prompt.is_admin || prompt.created_by.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this prompt" });
+    }
+    await Prompt.findByIdAndDelete(id);
+    res.json({ message: "Prompt deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting prompt:", error);
+    res.status(500).json({ error: "Error deleting prompt" });
+  }
+});
+
+// POST: Toggle bookmark for a prompt
+// POST: Toggle bookmark for a prompt
+router.post("/prompts/:id/bookmark", async (req, res) => {
+  const { id } = req.params; // Prompt ID
+  const { userId } = req.body; // Logged-in user's ID
+
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+
+  try {
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Initialize bookmarks if needed
+    if (!user.bookmarks) {
+      user.bookmarks = [];
+    }
+
+    // Toggle bookmark in user's bookmarks array:
+    const isBookmarked = user.bookmarks.includes(id);
+    if (isBookmarked) {
+      // Remove bookmark if it exists
+      user.bookmarks = user.bookmarks.filter((bookmarkId) => bookmarkId !== id);
+    } else {
+      // Add bookmark if it doesn't exist
+      user.bookmarks.push(id);
+    }
+    await user.save();
+
+    // Update prompt's favoriteUsers array
+    const prompt = await Prompt.findById(id);
+    if (!prompt) {
+      return res.status(404).json({ error: "Prompt not found" });
+    }
+
+    if (!prompt.favoriteUsers) {
+      prompt.favoriteUsers = [];
+    }
+
+    const userFavorited = prompt.favoriteUsers.includes(userId);
+    if (userFavorited) {
+      prompt.favoriteUsers = prompt.favoriteUsers.filter(
+        (favId) => favId !== userId
+      );
+    } else {
+      prompt.favoriteUsers.push(userId);
+    }
+    await prompt.save();
+
+    res.json({
+      message: isBookmarked
+        ? "Bookmark removed successfully"
+        : "Prompt bookmarked successfully",
+      bookmarks: user.bookmarks,
+      prompt,
+    });
+  } catch (error) {
+    console.error("Error toggling bookmark:", error);
+    res.status(500).json({ error: "Error toggling bookmark" });
+  }
+});
+
+// POST: Dynamically generate a prompt using a YouTube transcript
+router.post("/prompts/from-youtube", async (req, res) => {
+  const { userId, youtubeUrl, niche, style } = req.body;
+  if (!userId || !youtubeUrl || !niche || !style) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    // Extract video ID from YouTube URL (simplified)
+    const videoIdMatch = youtubeUrl.match(/v=([^&]+)/);
+    if (!videoIdMatch) {
+      return res.status(400).json({ error: "Invalid YouTube URL" });
+    }
+    const videoId = videoIdMatch[1];
+
+    // Retrieve the transcript (using a placeholder API endpoint)
+    const transcriptResponse = await axios.get(
+      `https://api.example.com/youtube-transcript?videoId=${videoId}`
+    );
+    const transcript = transcriptResponse.data.transcript;
+
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are an expert prompt generator for YouTube script creation.",
+      },
+      {
+        role: "user",
+        content: `Using the following YouTube transcript, generate a prompt style optimized for script creation in the niche "${niche}" with a "${style}" style:\n\n${transcript}`,
+      },
+    ];
+    const responseChat = await client.chat.completions.create({
+      messages,
+      model: modelName,
+      temperature: 0.8,
+      max_tokens: 800,
+      top_p: 0.95,
+    });
+    const generatedPrompt = responseChat.choices[0].message.content.trim();
+
+    // Save the dynamically generated prompt (user-created)
+    const newPrompt = new Prompt({
+      niche,
+      style,
+      promptTemplate: generatedPrompt,
+      created_by: userId,
+      is_admin: false,
+    });
+    await newPrompt.save();
+    res.json({
+      message: "Dynamic prompt generated and saved successfully",
+      prompt: newPrompt,
+    });
+  } catch (error) {
+    console.error("Error generating dynamic prompt:", error);
+    res.status(500).json({ error: "Error generating dynamic prompt" });
+  }
+});
+
+// GET: Retrieve a single prompt by its ID
+router.get("/prompts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const prompt = await Prompt.findById(id);
+    if (!prompt) {
+      return res.status(404).json({ error: "Prompt not found" });
+    }
+    res.json(prompt);
+  } catch (error) {
+    console.error("Error fetching prompt:", error);
+    res.status(500).json({ error: "Error fetching prompt" });
+  }
+});
+
+// POST: Generate a new script with user ID stored
+router.post("/generate", async (req, res) => {
+  console.log("Received payload:", req.body);
+  const { userId, niche, title, style, length } = req.body;
+  if (!userId || !niche || !title || !style || !length) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.tokens < 20) {
+      return res
+        .status(400)
+        .json({ error: "Not enough tokens to generate a new script" });
+    }
+    user.tokens -= 20;
+    await user.save();
+
+    const messages = [
+      {
+        role: "system",
+        content: "You are a creative script writer for YouTube videos.",
+      },
+      {
+        role: "user",
+        content: `Create a YouTube script for a ${length} video in the ${niche} niche. The topic is "${title}". Use a ${style} prompt to make the content engaging and informative. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`,
+      },
+    ];
+    let responseChat = await client.chat.completions.create({
+      messages,
+      model: modelName,
+      temperature: 0.8,
+      max_tokens: 1500,
+      top_p: 0.95,
+    });
+
+    let generatedScript = responseChat.choices[0].message.content.trim();
+
+    if (
+      !generatedScript.toLowerCase().includes("end") &&
+      generatedScript.length < 2500
+    ) {
+      messages.push({
+        role: "assistant",
+        content: generatedScript,
+      });
+      messages.push({
+        role: "user",
+        content:
+          "The script seems incomplete. Please continue from where it left off, ensuring the script remains solid and does not include any production instructions or stage directions.",
+      });
+
+      responseChat = await client.chat.completions.create({
+        messages,
+        model: modelName,
+        temperature: 0.8,
+        max_tokens: 1500,
+        top_p: 0.95,
+      });
+
+      const continuation = responseChat.choices[0].message.content.trim();
+      generatedScript += "\n" + continuation;
+    }
+
+    const script = new Script({
+      userId,
+      title,
+      content: generatedScript,
+      niche,
+      style,
+      status: "unused",
+    });
+    await script.save();
+    res.json({ message: "Script generated successfully", script });
+  } catch (error) {
+    console.error("Error generating script:", error);
+    res.status(500).json({ error: "Error generating script" });
+  }
+});
+
+// POST: Dynamically generate a prompt using a YouTube transcript
+router.post("/prompts/from-youtube", async (req, res) => {
+  const { userId, youtubeUrl, niche, style } = req.body;
+  if (!userId || !youtubeUrl || !niche || !style) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    // 1. Extract video ID from the YouTube URL (simplified example)
+    const videoIdMatch = youtubeUrl.match(/v=([^&]+)/);
+    if (!videoIdMatch) {
+      return res.status(400).json({ error: "Invalid YouTube URL" });
+    }
+    const videoId = videoIdMatch[1];
+
+    // 2. Retrieve the transcript via a YouTube transcript API
+    // (This is just an example. You might need to integrate a real API or a library)
+    const transcriptResponse = await axios.get(
+      `https://api.example.com/youtube-transcript?videoId=${videoId}`
+    );
+    const transcript = transcriptResponse.data.transcript;
+
+    // 3. Generate a structured prompt using OpenAI
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are an expert prompt generator for YouTube script creation.",
+      },
+      {
+        role: "user",
+        content: `Using the following YouTube transcript, generate a prompt style optimized for script creation in the niche "${niche}" with a "${style}" style:\n\n${transcript}`,
+      },
+    ];
+    const responseChat = await client.chat.completions.create({
+      messages,
+      model: modelName,
+      temperature: 0.8,
+      max_tokens: 800,
+      top_p: 0.95,
+    });
+    const generatedPrompt = responseChat.choices[0].message.content.trim();
+
+    // 4. Save the dynamically generated prompt (marking it as user-created)
+    const newPrompt = new Prompt({
+      niche,
+      style,
+      promptTemplate: generatedPrompt,
+      created_by: userId,
+      is_admin: false,
+    });
+    await newPrompt.save();
+    res.json({
+      message: "Dynamic prompt generated and saved successfully",
+      prompt: newPrompt,
+    });
+  } catch (error) {
+    console.error("Error generating dynamic prompt:", error);
+    res.status(500).json({ error: "Error generating dynamic prompt" });
+  }
+});
+
+// GET: Retrieve a single prompt by its ID
+router.get("/prompts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const prompt = await Prompt.findById(id);
+    if (!prompt) {
+      return res.status(404).json({ error: "Prompt not found" });
+    }
+    res.json(prompt);
+  } catch (error) {
+    console.error("Error fetching prompt:", error);
+    res.status(500).json({ error: "Error fetching prompt" });
   }
 });
 
@@ -528,19 +908,6 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting script:", error);
     res.status(500).json({ error: "Error deleting script" });
-  }
-});
-
-router.get("/user/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select(
-      "id name email tokens admin subscriptionStatus"
-    );
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
 

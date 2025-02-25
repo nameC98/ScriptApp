@@ -1,0 +1,191 @@
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import PromptCard from "../components/PromptCard";
+
+function PromptsPage() {
+  const [prompts, setPrompts] = useState([]);
+  const [filteredPrompts, setFilteredPrompts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // "all" => admin prompts; "my" => user-created prompts; "favorites" => bookmarked prompts
+  const [filterType, setFilterType] = useState("all");
+  const [selectedNiche, setSelectedNiche] = useState("all");
+
+  // Retrieve logged-in user's ID from localStorage
+  const userId = localStorage.getItem("userId");
+
+  console.log(prompts);
+
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/scripts/prompts"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch prompts");
+        }
+        const data = await response.json();
+        // Sort so the most recent prompts come first (using createdAt or updatedAt as fallback)
+        const sortedData = data.sort(
+          (a, b) =>
+            new Date(b.createdAt || b.updatedAt) -
+            new Date(a.createdAt || a.updatedAt)
+        );
+        setPrompts(sortedData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrompts();
+  }, []);
+
+  // Update filtered prompts when filters change
+  useEffect(() => {
+    let filtered = [];
+
+    if (filterType === "all") {
+      // Show only admin-created prompts (is_admin === true)
+      filtered = prompts.filter((prompt) => prompt.is_admin === true);
+    } else if (filterType === "my" && userId) {
+      // Show only user-created prompts (is_admin === false and created_by equals userId)
+      filtered = prompts.filter(
+        (prompt) => prompt.created_by && prompt.created_by.toString() === userId
+      );
+    } else if (filterType === "favorites" && userId) {
+      // Show bookmarked prompts: favoriteUsers includes the userId
+      filtered = prompts.filter(
+        (prompt) =>
+          prompt.favoriteUsers && prompt.favoriteUsers.includes(userId)
+      );
+    } else {
+      filtered = prompts;
+    }
+
+    // Apply niche filter if one is selected
+    if (selectedNiche !== "all") {
+      filtered = filtered.filter((prompt) => prompt.niche === selectedNiche);
+    }
+
+    // Sort by createdAt (or updatedAt if createdAt is missing)
+    filtered.sort(
+      (a, b) =>
+        new Date(b.createdAt || b.updatedAt) -
+        new Date(a.createdAt || a.updatedAt)
+    );
+
+    setFilteredPrompts(filtered);
+  }, [filterType, selectedNiche, prompts, userId]);
+
+  // Get unique niches for the dropdown
+  const uniqueNiches = ["all", ...new Set(prompts.map((p) => p.niche))];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl">Loading prompts...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#EEF5FF] min-h-screen overflow-x-hidden">
+      <div className="container mx-auto max-w-full p-4 sm:p-6 lg:p-8 flex flex-col">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Prompt Library</h1>
+          <p className="text-gray-600">
+            Create, manage, and generate prompts to power your YouTube scripts.
+          </p>
+        </div>
+
+        {/* Filters Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-gray-200 rounded-lg p-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilterType("all")}
+              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                filterType === "all"
+                  ? "bg-blue-500 text-white"
+                  : "bg-[#EEF5FF] font-bold text-black"
+              }`}
+            >
+              All Prompts
+            </button>
+            <button
+              onClick={() => setFilterType("my")}
+              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                filterType === "my"
+                  ? "bg-blue-500 text-white"
+                  : "bg-[#EEF5FF] font-bold text-black"
+              }`}
+            >
+              My Prompts
+            </button>
+            <button
+              onClick={() => setFilterType("favorites")}
+              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                filterType === "favorites"
+                  ? "bg-blue-500 text-white"
+                  : "bg-[#EEF5FF] font-bold text-black"
+              }`}
+            >
+              Favorites
+            </button>
+          </div>
+
+          {/* Niche Filter Dropdown */}
+          <div>
+            <select
+              value={selectedNiche}
+              onChange={(e) => setSelectedNiche(e.target.value)}
+              className="px-3 py-2 border text-xs sm:text-sm rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
+            >
+              {uniqueNiches.map((niche, index) => (
+                <option key={index} value={niche}>
+                  {niche === "all" ? "All Niches" : niche}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Create New Prompt Button */}
+          <div>
+            <NavLink
+              to="/create-prompt"
+              className="px-4 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white text-xs sm:text-sm font-semibold"
+            >
+              Create New Prompt
+            </NavLink>
+          </div>
+        </div>
+
+        {/* Prompts Grid */}
+        {filteredPrompts.length === 0 ? (
+          <p className="text-center text-gray-500">
+            No prompts match the selected criteria.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-5">
+            {filteredPrompts.map((prompt) => (
+              <PromptCard key={prompt._id} prompt={prompt} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default PromptsPage;
