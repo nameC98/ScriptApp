@@ -32,23 +32,37 @@ import { FaCrown } from "react-icons/fa";
 import PromptsPage from "./pages/Prompts";
 import PromptDetailPage from "./pages/PromptDetailPage";
 import CreatePromptPage from "./pages/CreatePromptPage";
+import PostScript from "./admin/pages/PostScript";
 
 function NavBar({ user }) {
   const [userData, setUserData] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const userId2 = localStorage.getItem("userId");
   const location = useLocation();
+
+  console.log(userId2);
+
   // Fetch user info
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await fetch(
-        `http://localhost:5000/api/scripts/user/${userId2}`
-      );
-      const data = await response.json();
-      setUserData(data);
+      try {
+        const response = await fetch(`http://localhost:5000/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // ensure you store your token in localStorage after login
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch user");
+        }
+        const data = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
     };
     fetchUser();
-  }, [userId2]);
+  }, []);
+  console.log(userData);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -377,14 +391,13 @@ function App() {
             <Route path="/prompts" element={<PromptsPage />} />
             <Route path="/prompts/:id" element={<PromptDetailPage />} />
             <Route path="/create-prompt" element={<CreatePromptPage />} />
-            {/* Admin Routes (visible only if user is admin) */}
             {user && (user.admin === true || user.admin === "true") && (
               <Route path="/admin/*" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="prompts" element={<AdminPrompts />} />
                 <Route path="adminoverview" element={<AdminOverview />} />
                 <Route path="users" element={<UserManagementPage />} />
-                {/* Add additional nested admin routes here */}
+                <Route path="adminscripts" element={<PostScript />} />
               </Route>
             )}
           </Route>

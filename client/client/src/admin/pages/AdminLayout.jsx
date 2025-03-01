@@ -48,6 +48,16 @@ function AdminLayout() {
           >
             OverView
           </NavLink>
+          <NavLink
+            to="/admin/adminscripts"
+            className={({ isActive }) =>
+              isActive
+                ? "text-blue-600 border-b-2 border-blue-600 pb-2"
+                : "text-gray-600 hover:text-blue-600 pb-2"
+            }
+          >
+            Post Script
+          </NavLink>
 
           {/* Add additional admin links here */}
         </div>

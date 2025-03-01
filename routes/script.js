@@ -4,6 +4,7 @@ import Script from "../models/Script.js";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import Prompt from "../models/Prompt.js";
+import axios from "axios";
 
 dotenv.config();
 
@@ -73,37 +74,6 @@ router.get("/public", async (req, res) => {
   } catch (error) {
     console.error("Error fetching admin scripts:", error);
     res.status(500).json({ error: "Error fetching admin scripts" });
-  }
-});
-// POST: Create a new prompt template (admin creation)
-router.post("/prompt", async (req, res) => {
-  const { niche, style, promptTemplate } = req.body;
-  console.log("Received data:", req.body); // Debug log
-
-  if (!niche || !style || !promptTemplate) {
-    return res.status(400).json({
-      error: "Missing required fields: niche, style, and promptTemplate",
-    });
-  }
-
-  try {
-    const newPrompt = new Prompt({
-      niche,
-      style,
-      promptTemplate,
-      is_admin: true,
-    });
-
-    console.log("Saving prompt:", newPrompt); // Debug log
-
-    await newPrompt.save();
-    res.json({
-      message: "Prompt template saved successfully",
-      prompt: newPrompt,
-    });
-  } catch (error) {
-    console.error("Error saving prompt template:", error);
-    res.status(500).json({ error: "Error saving prompt template" });
   }
 });
 
@@ -298,37 +268,98 @@ router.post("/prompts/:id/bookmark", async (req, res) => {
   }
 });
 
-// POST: Dynamically generate a prompt using a YouTube transcript
 router.post("/prompts/from-youtube", async (req, res) => {
   const { userId, youtubeUrl, niche, style } = req.body;
-  if (!userId || !youtubeUrl || !niche || !style) {
-    return res.status(400).json({ error: "Missing required fields" });
+  console.log("Request Body:", req.body);
+
+  if (!userId || !youtubeUrl) {
+    return res
+      .status(400)
+      .json({ error: "Missing required fields: userId and YouTube URL" });
   }
+
+  // Trim the URL and remove query parameters
+  const trimmedUrl = youtubeUrl.trim();
+  const baseUrl = trimmedUrl.split("?")[0];
+
+  // Extract the 11-character YouTube video ID using regex
+  const videoIdMatch = baseUrl.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/i
+  );
+  console.log("Regex match:", videoIdMatch);
+
+  if (!videoIdMatch) {
+    return res.status(400).json({ error: "Invalid YouTube URL" });
+  }
+  const videoId = videoIdMatch[1];
+
+  // Convert to canonical URL if it's in youtu.be format
+  let canonicalUrl = baseUrl;
+  if (baseUrl.includes("youtu.be")) {
+    canonicalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  }
+
+  console.log("Extracted Video ID:", videoId);
+  console.log("Canonical URL:", canonicalUrl);
+
   try {
-    // Extract video ID from YouTube URL (simplified)
-    const videoIdMatch = youtubeUrl.match(/v=([^&]+)/);
-    if (!videoIdMatch) {
-      return res.status(400).json({ error: "Invalid YouTube URL" });
-    }
-    const videoId = videoIdMatch[1];
-
-    // Retrieve the transcript (using a placeholder API endpoint)
+    // Retrieve transcript using RapidAPI with the canonical URL
     const transcriptResponse = await axios.get(
-      `https://api.example.com/youtube-transcript?videoId=${videoId}`
+      `https://youtube-transcripts.p.rapidapi.com/youtube/transcript?url=${encodeURIComponent(
+        canonicalUrl
+      )}&videoId=${videoId}&chunkSize=500`,
+      {
+        headers: {
+          "x-rapidapi-host": "youtube-transcripts.p.rapidapi.com",
+          "x-rapidapi-key":
+            "c4c4aa15edmsh019100cc1904293p19eba6jsnd83a8a183457",
+        },
+      }
     );
-    const transcript = transcriptResponse.data.transcript;
 
+    // Log the entire API response for debugging purposes
+    console.log("Transcript API Response:", transcriptResponse.data);
+
+    // Build the transcript string from the content array
+    let transcript = "";
+    if (
+      transcriptResponse.data.content &&
+      transcriptResponse.data.content.length
+    ) {
+      transcript = transcriptResponse.data.content
+        .map((item) => item.text)
+        .join(" ");
+    }
+
+    // If transcript is still empty or undefined, return an error
+    if (!transcript) {
+      console.warn("Transcript is missing from the API response.");
+      return res.status(400).json({
+        error:
+          "Transcript not found. This video might not have captions enabled.",
+      });
+    }
+
+    const derivedNiche = niche || "General";
+    const derivedStyle = style || "Neutral";
+
+    // Adjust the prompt for generating a style template for title generation
     const messages = [
       {
         role: "system",
-        content:
-          "You are an expert prompt generator for YouTube script creation.",
+        content: "You are an expert creative prompt generator.",
       },
       {
         role: "user",
-        content: `Using the following YouTube transcript, generate a prompt style optimized for script creation in the niche "${niche}" with a "${style}" style:\n\n${transcript}`,
+        content: `Based on the following YouTube transcript, generate a prompt style template for creating engaging titles. The template should be designed for the "${derivedNiche}" niche with a "${derivedStyle}" tone. It must include creative guidelines such as using an attention-grabbing hook, incorporating vivid imagery, and maintaining a neutral yet inspiring tone. The style template should serve as a blueprint to generate different titles in the future while keeping the essence of the transcript's message in mind.
+
+Transcript:
+${transcript}
+
+Please provide only the prompt style template. Do not include extra explanations.`,
       },
     ];
+
     const responseChat = await client.chat.completions.create({
       messages,
       model: modelName,
@@ -336,19 +367,21 @@ router.post("/prompts/from-youtube", async (req, res) => {
       max_tokens: 800,
       top_p: 0.95,
     });
+
     const generatedPrompt = responseChat.choices[0].message.content.trim();
 
-    // Save the dynamically generated prompt (user-created)
+    // Save the generated prompt template in the database
     const newPrompt = new Prompt({
-      niche,
-      style,
+      niche: derivedNiche,
+      style: derivedStyle,
       promptTemplate: generatedPrompt,
       created_by: userId,
       is_admin: false,
     });
     await newPrompt.save();
+
     res.json({
-      message: "Dynamic prompt generated and saved successfully",
+      message: "Dynamic title prompt style generated and saved successfully",
       prompt: newPrompt,
     });
   } catch (error) {
@@ -375,8 +408,13 @@ router.get("/prompts/:id", async (req, res) => {
 // POST: Generate a new script with user ID stored
 router.post("/generate", async (req, res) => {
   console.log("Received payload:", req.body);
-  const { userId, niche, title, style, length } = req.body;
-  if (!userId || !niche || !title || !style || !length) {
+  const { userId, title, promptTemplate, style, length } = req.body;
+  console.log(req.body);
+
+  // Set a default niche value since it's required by the schema
+  const niche = req.body.niche || "General";
+
+  if (!userId || !title || !promptTemplate || !style || !length) {
     return res.status(400).json({ error: "Missing required fields" });
   }
   try {
@@ -397,7 +435,7 @@ router.post("/generate", async (req, res) => {
       },
       {
         role: "user",
-        content: `Create a YouTube script for a ${length} video in the ${niche} niche. The topic is "${title}". Use a ${style} prompt to make the content engaging and informative. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`,
+        content: `Create a YouTube script for a ${length} video. The topic is "${title}". Use the following prompt to make the content engaging and informative: ${promptTemplate}. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`,
       },
     ];
     let responseChat = await client.chat.completions.create({
@@ -440,178 +478,9 @@ router.post("/generate", async (req, res) => {
       userId,
       title,
       content: generatedScript,
-      niche,
+      promptTemplate,
       style,
-      status: "unused",
-    });
-    await script.save();
-    res.json({ message: "Script generated successfully", script });
-  } catch (error) {
-    console.error("Error generating script:", error);
-    res.status(500).json({ error: "Error generating script" });
-  }
-});
-
-// POST: Dynamically generate a prompt using a YouTube transcript
-router.post("/prompts/from-youtube", async (req, res) => {
-  const { userId, youtubeUrl, niche, style } = req.body;
-  if (!userId || !youtubeUrl || !niche || !style) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-  try {
-    // 1. Extract video ID from the YouTube URL (simplified example)
-    const videoIdMatch = youtubeUrl.match(/v=([^&]+)/);
-    if (!videoIdMatch) {
-      return res.status(400).json({ error: "Invalid YouTube URL" });
-    }
-    const videoId = videoIdMatch[1];
-
-    // 2. Retrieve the transcript via a YouTube transcript API
-    // (This is just an example. You might need to integrate a real API or a library)
-    const transcriptResponse = await axios.get(
-      `https://api.example.com/youtube-transcript?videoId=${videoId}`
-    );
-    const transcript = transcriptResponse.data.transcript;
-
-    // 3. Generate a structured prompt using OpenAI
-    const messages = [
-      {
-        role: "system",
-        content:
-          "You are an expert prompt generator for YouTube script creation.",
-      },
-      {
-        role: "user",
-        content: `Using the following YouTube transcript, generate a prompt style optimized for script creation in the niche "${niche}" with a "${style}" style:\n\n${transcript}`,
-      },
-    ];
-    const responseChat = await client.chat.completions.create({
-      messages,
-      model: modelName,
-      temperature: 0.8,
-      max_tokens: 800,
-      top_p: 0.95,
-    });
-    const generatedPrompt = responseChat.choices[0].message.content.trim();
-
-    // 4. Save the dynamically generated prompt (marking it as user-created)
-    const newPrompt = new Prompt({
       niche,
-      style,
-      promptTemplate: generatedPrompt,
-      created_by: userId,
-      is_admin: false,
-    });
-    await newPrompt.save();
-    res.json({
-      message: "Dynamic prompt generated and saved successfully",
-      prompt: newPrompt,
-    });
-  } catch (error) {
-    console.error("Error generating dynamic prompt:", error);
-    res.status(500).json({ error: "Error generating dynamic prompt" });
-  }
-});
-
-// GET: Retrieve a single prompt by its ID
-router.get("/prompts/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const prompt = await Prompt.findById(id);
-    if (!prompt) {
-      return res.status(404).json({ error: "Prompt not found" });
-    }
-    res.json(prompt);
-  } catch (error) {
-    console.error("Error fetching prompt:", error);
-    res.status(500).json({ error: "Error fetching prompt" });
-  }
-});
-
-//
-// === Script Generation & Rephrasing Routes ===
-//
-
-// POST: Generate a new script with user ID stored and chain requests if needed
-router.post("/generate", async (req, res) => {
-  console.log("Received payload:", req.body); // Log the incoming data
-
-  const { userId, niche, title, style, length } = req.body;
-  if (!userId || !niche || !title || !style || !length) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-  try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.tokens < 20) {
-      return res
-        .status(400)
-        .json({ error: "Not enough tokens to generate a new script" });
-    }
-    user.tokens -= 20;
-    await user.save();
-
-    // Build your messages and log them if needed:
-    const messages = [
-      {
-        role: "system",
-        content: "You are a creative script writer for YouTube videos.",
-      },
-      {
-        role: "user",
-        content: `Create a YouTube script for a ${length} video in the ${niche} niche. The topic is "${title}". Use a ${style} prompt to make the content engaging and informative. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`,
-      },
-    ];
-    console.log("Messages sent to AI:", messages);
-
-    // First generation call
-    let responseChat = await client.chat.completions.create({
-      messages,
-      model: modelName,
-      temperature: 0.8,
-      max_tokens: 1500,
-      top_p: 0.95,
-    });
-
-    let generatedScript = responseChat.choices[0].message.content.trim();
-    console.log("Initial generated script:", generatedScript);
-
-    // Check if the script might be cut off. If yes, continue generating.
-    if (
-      !generatedScript.toLowerCase().includes("end") &&
-      generatedScript.length < 2500
-    ) {
-      messages.push({
-        role: "assistant",
-        content: generatedScript,
-      });
-      messages.push({
-        role: "user",
-        content:
-          "The script seems incomplete. Please continue from where it left off, ensuring the script remains solid and does not include any production instructions or stage directions.",
-      });
-
-      // Second generation call to continue the script
-      responseChat = await client.chat.completions.create({
-        messages,
-        model: modelName,
-        temperature: 0.8,
-        max_tokens: 1500,
-        top_p: 0.95,
-      });
-
-      const continuation = responseChat.choices[0].message.content.trim();
-      console.log("Continuation generated script:", continuation);
-      generatedScript += "\n" + continuation;
-    }
-
-    // Create and save the script in your database (timestamps will be added automatically)
-    const script = new Script({
-      userId,
-      title,
-      content: generatedScript,
-      niche,
-      style,
       status: "unused",
     });
     await script.save();
@@ -698,31 +567,6 @@ router.post("/rephrase", async (req, res) => {
   } catch (error) {
     console.error("Error rephrasing script:", error);
     res.status(500).json({ error: "Error rephrasing script" });
-  }
-});
-
-// POST: Admin creates a new public script
-router.post("/admin", async (req, res) => {
-  const { userId, title, content, niche, snippet, style } = req.body;
-  if (!userId || !title || !content || !niche || !style) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-  try {
-    const script = new Script({
-      userId,
-      title,
-      content,
-      niche,
-      style,
-      snippet,
-      status: "unused",
-      isAdmin: true,
-    });
-    await script.save();
-    res.json({ message: "Admin script posted successfully", script });
-  } catch (error) {
-    console.error("Error posting admin script:", error);
-    res.status(500).json({ error: "Error posting admin script" });
   }
 });
 

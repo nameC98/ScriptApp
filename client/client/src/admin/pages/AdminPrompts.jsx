@@ -1,7 +1,7 @@
 // src/admin/AdminPrompts.js
 import { useState, useEffect } from "react";
 
-const BASE_URL = "http://localhost:5000/api/scripts";
+const BASE_URL = "http://localhost:5000/api/admin";
 
 function AdminPrompts() {
   const [prompts, setPrompts] = useState([]);
@@ -30,16 +30,13 @@ function AdminPrompts() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchPrompts();
   }, []);
-
   // Handle input changes for the prompt form
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   // Handle form submission: create new or update existing prompt
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,25 +45,24 @@ function AdminPrompts() {
       alert("Please fill in all fields.");
       return;
     }
-
+    console.log("Submitting prompt:", formData);
     try {
       let res;
       if (id) {
-        // Update an existing prompt template
         res = await fetch(`${BASE_URL}/prompt/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ niche, style, promptTemplate }),
         });
       } else {
-        // Create a new prompt template
-        res = await fetch(`${BASE_URL}/prompt`, {
+        res = await fetch(`http://localhost:5000/api/admin/prompt`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ niche, style, promptTemplate }),
         });
       }
       const result = await res.json();
+      console.log("Server response:", result);
       if (res.ok) {
         alert(result.message);
         setFormData({ id: null, niche: "", style: "", promptTemplate: "" });
@@ -79,7 +75,6 @@ function AdminPrompts() {
       alert("Error submitting prompt.");
     }
   };
-
   // Populate the form for editing
   const handleEdit = (prompt) => {
     setFormData({
@@ -89,7 +84,6 @@ function AdminPrompts() {
       promptTemplate: prompt.promptTemplate,
     });
   };
-
   // Delete a prompt template
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this prompt?")) return;
@@ -109,27 +103,25 @@ function AdminPrompts() {
       alert("Error deleting prompt.");
     }
   };
-
   // Cancel editing and reset the form
   const handleCancelEdit = () => {
     setFormData({ id: null, niche: "", style: "", promptTemplate: "" });
   };
-
   // Filter prompts based on niche and style
   const filteredPrompts = prompts.filter((prompt) => {
     const matchesNiche = prompt.niche
+      .trim()
       .toLowerCase()
-      .includes(filterNiche.toLowerCase());
+      .includes(filterNiche.trim().toLowerCase());
     const matchesStyle = prompt.style
+      .trim()
       .toLowerCase()
-      .includes(filterStyle.toLowerCase());
+      .includes(filterStyle.trim().toLowerCase());
     return matchesNiche && matchesStyle;
   });
-
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h1 className="text-3xl font-bold mb-6">Prompt Management</h1>
-
       {/* Filter Section */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -153,7 +145,6 @@ function AdminPrompts() {
           />
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Form Section */}
         <div className="bg-white shadow rounded-lg p-6">
@@ -217,7 +208,6 @@ function AdminPrompts() {
             </div>
           </form>
         </div>
-
         {/* List Section */}
         <div className="bg-white shadow rounded-lg p-6 overflow-x-auto">
           <h2 className="text-2xl font-semibold mb-4">

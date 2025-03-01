@@ -8,13 +8,25 @@ function PromptsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // "all" => admin prompts; "my" => user-created prompts; "favorites" => bookmarked prompts
-  const [filterType, setFilterType] = useState("all");
-  const [selectedNiche, setSelectedNiche] = useState("all");
+
+  const [filterType, setFilterType] = useState(
+    () => localStorage.getItem("filterType") || "all"
+  );
+  const [selectedNiche, setSelectedNiche] = useState(
+    () => localStorage.getItem("selectedNiche") || "all"
+  );
 
   // Retrieve logged-in user's ID from localStorage
   const userId = localStorage.getItem("userId");
 
-  console.log(prompts);
+  // Save filter settings to localStorage whenever they change.
+  useEffect(() => {
+    localStorage.setItem("filterType", filterType);
+  }, [filterType]);
+
+  useEffect(() => {
+    localStorage.setItem("selectedNiche", selectedNiche);
+  }, [selectedNiche]);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -43,20 +55,31 @@ function PromptsPage() {
     fetchPrompts();
   }, []);
 
-  // Update filtered prompts when filters change
+  // Callback defined inside the component—has access to setPrompts.
+  const handleBookmarkToggle = (updatedPrompt) => {
+    setPrompts((prevPrompts) =>
+      prevPrompts.map((prompt) =>
+        prompt._id === updatedPrompt._id ? updatedPrompt : prompt
+      )
+    );
+  };
+
+  // Update filtered prompts when filters or prompts change
+  // Update filtered prompts when filters or prompts change
   useEffect(() => {
     let filtered = [];
 
+    // Determine which prompts to show based on filterType
     if (filterType === "all") {
-      // Show only admin-created prompts (is_admin === true)
-      filtered = prompts.filter((prompt) => prompt.is_admin === true);
+      // Accept everything (all prompts)
+      filtered = prompts.filter((prompt) => prompt.is_admin);
     } else if (filterType === "my" && userId) {
-      // Show only user-created prompts (is_admin === false and created_by equals userId)
+      // Show only user-created prompts
       filtered = prompts.filter(
         (prompt) => prompt.created_by && prompt.created_by.toString() === userId
       );
     } else if (filterType === "favorites" && userId) {
-      // Show bookmarked prompts: favoriteUsers includes the userId
+      // Show bookmarked prompts
       filtered = prompts.filter(
         (prompt) =>
           prompt.favoriteUsers && prompt.favoriteUsers.includes(userId)
@@ -65,12 +88,23 @@ function PromptsPage() {
       filtered = prompts;
     }
 
-    // Apply niche filter if one is selected
-    if (selectedNiche !== "all") {
-      filtered = filtered.filter((prompt) => prompt.niche === selectedNiche);
+    // Apply partial-match filtering for niche using regex (if a niche filter is provided)
+    if (selectedNiche.trim() !== "" && selectedNiche !== "all") {
+      const nicheRegex = new RegExp(selectedNiche.trim(), "i");
+      filtered = filtered.filter((prompt) =>
+        nicheRegex.test(prompt.niche.trim())
+      );
     }
 
-    // Sort by createdAt (or updatedAt if createdAt is missing)
+    // (Optional) If you have a separate style filter, you can apply it similarly:
+    // if (filterStyle.trim() !== "") {
+    //   const styleRegex = new RegExp(filterStyle.trim(), "i");
+    //   filtered = filtered.filter((prompt) =>
+    //     styleRegex.test(prompt.style.trim())
+    //   );
+    // }
+
+    // Finally, sort by createdAt (or updatedAt if createdAt is missing)
     filtered.sort(
       (a, b) =>
         new Date(b.createdAt || b.updatedAt) -
@@ -81,7 +115,6 @@ function PromptsPage() {
   }, [filterType, selectedNiche, prompts, userId]);
 
   // Get unique niches for the dropdown
-  const uniqueNiches = ["all", ...new Set(prompts.map((p) => p.niche))];
 
   if (loading) {
     return (
@@ -98,6 +131,16 @@ function PromptsPage() {
       </div>
     );
   }
+  const promptsForNiches = prompts.filter(
+    (prompt) =>
+      prompt.is_admin ||
+      (prompt.created_by && prompt.created_by.toString() === userId)
+  );
+  const uniqueNiches = [
+    "all",
+    ...new Set(promptsForNiches.map((p) => p.niche)),
+  ];
+  // Generate unique niches from the filtered prompts
 
   return (
     <div className="bg-[#EEF5FF] min-h-screen overflow-x-hidden">
@@ -179,7 +222,11 @@ function PromptsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-5">
             {filteredPrompts.map((prompt) => (
-              <PromptCard key={prompt._id} prompt={prompt} />
+              <PromptCard
+                key={prompt._id}
+                prompt={prompt}
+                onBookmarkToggle={handleBookmarkToggle}
+              />
             ))}
           </div>
         )}

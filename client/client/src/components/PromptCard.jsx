@@ -5,12 +5,13 @@ import { useState, useEffect } from "react";
 function PromptCard({ prompt, onBookmarkToggle }) {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
-  // Initialize local state based on whether the prompt is bookmarked by this user
+
+  // Local state to track whether this prompt is bookmarked by the user
   const [isBookmarked, setIsBookmarked] = useState(
     prompt.favoriteUsers && prompt.favoriteUsers.includes(userId)
   );
 
-  // When the prompt's favoriteUsers prop changes externally, update local state
+  // Update local state when prompt.favoriteUsers changes externally.
   useEffect(() => {
     setIsBookmarked(
       prompt.favoriteUsers && prompt.favoriteUsers.includes(userId)
@@ -21,6 +22,24 @@ function PromptCard({ prompt, onBookmarkToggle }) {
     text.length > length ? text.substring(0, length) + "..." : text;
 
   const handleBookmark = async () => {
+    // Optimistic update: toggle bookmark state immediately.
+    const optimisticNewState = !isBookmarked;
+    setIsBookmarked(optimisticNewState);
+
+    // Create an optimistic copy of the prompt with updated favoriteUsers.
+    const optimisticFavoriteUsers = optimisticNewState
+      ? [...(prompt.favoriteUsers || []), userId]
+      : (prompt.favoriteUsers || []).filter((u) => u !== userId);
+    const optimisticPrompt = {
+      ...prompt,
+      favoriteUsers: optimisticFavoriteUsers,
+    };
+
+    // Inform the parent immediately so the change appears in filtered lists.
+    if (onBookmarkToggle) {
+      onBookmarkToggle(optimisticPrompt);
+    }
+
     try {
       const response = await fetch(
         `http://localhost:5000/api/scripts/prompts/${prompt._id}/bookmark`,
@@ -33,18 +52,24 @@ function PromptCard({ prompt, onBookmarkToggle }) {
       const data = await response.json();
       console.log("Bookmark toggled:", data);
 
-      // Determine the new bookmark state from the response
+      // Use the updated prompt from the API response.
+      const updatedPrompt = data.prompt;
       const newBookmarkState =
-        data.prompt.favoriteUsers && data.prompt.favoriteUsers.includes(userId);
+        updatedPrompt.favoriteUsers &&
+        updatedPrompt.favoriteUsers.includes(userId);
       setIsBookmarked(newBookmarkState);
 
-      // If a callback was provided (e.g., when on the Favorites page),
-      // notify the parent. For example, if unbookmarked, the parent can remove this prompt.
+      // Update parent state with the confirmed prompt data.
       if (onBookmarkToggle) {
-        onBookmarkToggle(prompt._id, newBookmarkState);
+        onBookmarkToggle(updatedPrompt);
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
+      // Revert the optimistic update if the API call fails.
+      setIsBookmarked(!optimisticNewState);
+      if (onBookmarkToggle) {
+        onBookmarkToggle(prompt);
+      }
     }
   };
 
@@ -58,12 +83,8 @@ function PromptCard({ prompt, onBookmarkToggle }) {
         />
       )}
       <div className="flex-1">
-        <h2 className="text-xl font-bold mb-1">
-          {prompt.title || prompt.style || "Prompt"}
-        </h2>
-        <p className="text-sm text-gray-600 mb-2">
-          {prompt.niche} &bull; {prompt.style}
-        </p>
+        <h2 className="text-xl font-bold mb-1">{prompt.title || "Prompt"}</h2>
+        <p className="text-sm font-bold text-gray-600 mb-2">{prompt.niche}</p>
         <p className="text-sm text-gray-500">
           {truncateText(prompt.promptTemplate)}
         </p>
@@ -83,7 +104,7 @@ function PromptCard({ prompt, onBookmarkToggle }) {
               : "text-blue-500 hover:bg-blue-500 hover:text-white"
           }`}
         >
-          Bookmark
+          {isBookmarked ? "Bookmarked" : "Bookmark"}
         </button>
       </div>
     </div>
@@ -101,8 +122,7 @@ PromptCard.propTypes = {
     image: PropTypes.string,
     favoriteUsers: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
-  // Optional callback that lets the parent know when a bookmark is toggled.
-  // For example, the Favorites view can remove a prompt if it's unbookmarked.
+  // Callback to notify the parent when a bookmark is toggled.
   onBookmarkToggle: PropTypes.func,
 };
 

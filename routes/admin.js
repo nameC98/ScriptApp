@@ -3,6 +3,7 @@ import express from "express";
 import User from "../models/User.js";
 import Script from "../models/Script.js";
 import bcrypt from "bcrypt";
+import Prompt from "../models/Prompt.js";
 
 const router = express.Router();
 
@@ -198,6 +199,62 @@ router.patch("/users/:id/plan", async (req, res) => {
   } catch (error) {
     console.error("Error updating user plan:", error);
     res.status(500).json({ error: "Error updating user plan" });
+  }
+});
+
+// POST: Admin creates a new public script
+router.post("/admin-sripts", async (req, res) => {
+  const { userId, title, content, niche, snippet, style } = req.body;
+  if (!userId || !title || !content || !niche || !style) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  try {
+    const script = new Script({
+      userId,
+      title,
+      content,
+      niche,
+      style,
+      snippet,
+      status: "unused",
+      isAdmin: true,
+    });
+    await script.save();
+    res.json({ message: "Admin script posted successfully", script });
+  } catch (error) {
+    console.error("Error posting admin script:", error);
+    res.status(500).json({ error: "Error posting admin script" });
+  }
+});
+// POST: Create a new prompt template (admin creation)
+router.post("/prompt", async (req, res) => {
+  const { niche, style, promptTemplate } = req.body;
+  console.log("Received data:", req.body); // Debug log
+
+  if (!niche || !style || !promptTemplate) {
+    return res.status(400).json({
+      error: "Missing required fields: niche, style, and promptTemplate",
+    });
+  }
+
+  try {
+    const newPrompt = new Prompt({
+      niche,
+      style,
+      promptTemplate,
+      is_admin: true,
+    });
+
+    console.log("Saving prompt:", newPrompt); // Debug log
+
+    await newPrompt.save();
+    res.json({
+      message: "Prompt template saved successfully",
+      prompt: newPrompt,
+    });
+  } catch (error) {
+    console.error("Error saving prompt template:", error);
+    res.status(500).json({ error: "Error saving prompt template" });
   }
 });
 
