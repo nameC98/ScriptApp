@@ -21,70 +21,44 @@ router.get("/", async (req, res) => {
     if (niche && niche !== "all") {
       query.niche = niche;
     }
+    // Filter by rank if provided
+    if (rank && rank !== "All") {
+      query.rank = rank;
+    }
 
     const videos = await Video.find(query);
 
-    // Calculation of trending score based on views and subscribers only
-    const scoredVideos = videos.map((video) => {
-      const daysSinceUpload =
-        (Date.now() - new Date(video.uploadDate)) / (1000 * 3600 * 24);
-      const normViews = Math.log(video.views + 1);
-      const normSubscribers = Math.log(video.channelSubscribers + 1);
-
-      // Adjust these weights as needed
-      const viewsWeight = 0.5;
-      const subscribersWeight = 0.5;
-      const weightedSum =
-        viewsWeight * normViews + subscribersWeight * normSubscribers;
-
-      // Apply recency factor with a decay constant (e.g., 30 days)
-      const decayConstant = 30;
-      const recencyFactor = Math.exp(-daysSinceUpload / decayConstant);
-
-      const trendingScore = weightedSum * recencyFactor;
-
-      return {
-        ...video.toObject(),
-        trendingScore,
-      };
-    });
-
-    // Filter videos based on rank if requested
-    let filteredVideos = scoredVideos;
-    if (rank && rank !== "All") {
-      if (rank === "Excellent") {
-        filteredVideos = filteredVideos.filter(
-          (video) => video.trendingScore >= 7
-        );
-      } else if (rank === "Very Good") {
-        filteredVideos = filteredVideos.filter(
-          (video) => video.trendingScore >= 4 && video.trendingScore < 7
-        );
-      } else if (rank === "Good") {
-        filteredVideos = filteredVideos.filter(
-          (video) => video.trendingScore < 4
-        );
-      }
-    }
-
-    // Sort results based on the "sort" param
+    // Sort results based on the "sort" parameter
+    let sortedVideos;
     if (sort === "new") {
-      filteredVideos.sort(
+      sortedVideos = videos.sort(
         (a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)
       );
+    } else if (sort === "rank") {
+      sortedVideos = videos.sort(
+        (a, b) => (b.trendingScore || 0) - (a.trendingScore || 0)
+      );
     } else {
-      filteredVideos.sort((a, b) => b.trendingScore - a.trendingScore);
+      sortedVideos = videos;
     }
 
-    res.json(filteredVideos);
+    res.json(sortedVideos);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 // POST /api/videos - For manual data entry (admin-only in a real app)
 router.post("/", async (req, res) => {
-  const { title, views, likes, uploadDate, channelSubscribers, niche } =
-    req.body;
+  const {
+    title,
+    views,
+    likes,
+    uploadDate,
+    channelSubscribers,
+    niche,
+    trendingScore,
+    rank,
+  } = req.body;
   const video = new Video({
     title,
     views,
@@ -92,6 +66,8 @@ router.post("/", async (req, res) => {
     uploadDate,
     channelSubscribers,
     niche,
+    trendingScore,
+    rank,
   });
   try {
     const newVideo = await video.save();

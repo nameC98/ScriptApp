@@ -8,6 +8,7 @@ const videoSchema = new mongoose.Schema(
     uploadDate: { type: Date, required: true },
     channelSubscribers: { type: Number, required: true },
     niche: { type: String, required: true },
+    rank: { type: String, enum: ["Excellent", "Very Good", "Good"] },
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt
 );

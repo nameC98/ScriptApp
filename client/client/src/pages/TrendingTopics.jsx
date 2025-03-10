@@ -58,7 +58,22 @@ const TrendingTopics = () => {
   const handleRankChange = (e) => setRank(e.target.value);
 
   // Determine the rank category for display
-  const getRankCategory = (score) => {
+  const getRankCategory = (video) => {
+    if (!video || typeof video !== "object") {
+      return { label: "Unknown", color: "#6c757d" }; // Gray color for undefined cases
+    }
+
+    // Ensure we check `video.rank`
+    if (video.rank) {
+      if (video.rank === "Excellent")
+        return { label: "Excellent", color: "#28a745" };
+      if (video.rank === "Very Good")
+        return { label: "Very Good", color: "#ffc107" };
+      if (video.rank === "Good") return { label: "Good", color: "#dc3545" };
+    }
+
+    // Fallback based on trendingScore
+    const score = video.trendingScore || 0;
     if (score >= 15) return { label: "Excellent", color: "#28a745" };
     if (score >= 8) return { label: "Very Good", color: "#ffc107" };
     return { label: "Good", color: "#dc3545" };
@@ -177,7 +192,7 @@ const TrendingTopics = () => {
           }}
         >
           {videos.map((video) => {
-            const rankObj = getRankCategory(video.trendingScore);
+            const rankObj = getRankCategory(video);
             return (
               <div
                 key={video._id}
