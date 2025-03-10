@@ -255,25 +255,6 @@ function CustomScriptForm() {
           </div>
 
           {/* YouTube Channel (optional) */}
-          <div>
-            <label
-              htmlFor="channel"
-              className="block text-sm font-medium text-gray-700"
-            >
-              YouTube Channel (optional):
-            </label>
-            <select
-              id="channel"
-              value={channel}
-              onChange={(e) => setChannel(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-            >
-              <option value="">Select Channel</option>
-              <option value="MKBHD">MKBHD</option>
-              <option value="Casey Neistat">Casey Neistat</option>
-              <option value="Linus Tech Tips">Linus Tech Tips</option>
-            </select>
-          </div>
 
           {/* Prompt Style */}
           <div>
@@ -283,7 +264,7 @@ function CustomScriptForm() {
             <div className="flex items-center mt-1">
               <input
                 type="text"
-                value={selectedPrompt ? selectedPrompt.style : ""}
+                value={selectedPrompt ? selectedPrompt.promptTemplate : ""}
                 readOnly
                 placeholder="No prompt style selected"
                 className="flex-1 w-[20px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none"

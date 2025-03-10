@@ -65,7 +65,6 @@ function PromptCard({ prompt, onBookmarkToggle }) {
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
-      // Revert the optimistic update if the API call fails.
       setIsBookmarked(!optimisticNewState);
       if (onBookmarkToggle) {
         onBookmarkToggle(prompt);
@@ -122,7 +121,6 @@ PromptCard.propTypes = {
     image: PropTypes.string,
     favoriteUsers: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
-  // Callback to notify the parent when a bookmark is toggled.
   onBookmarkToggle: PropTypes.func,
 };
 

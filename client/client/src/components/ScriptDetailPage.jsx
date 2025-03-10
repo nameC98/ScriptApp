@@ -32,8 +32,10 @@ function ScriptDetailPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  // Available prompts state
+  // Available prompts and filtering state
   const [availablePrompts, setAvailablePrompts] = useState([]);
+  const [filterType, setFilterType] = useState("all"); // "all", "my", or "favorites"
+  const [selectedNiche, setSelectedNiche] = useState("all");
   const userId2 = localStorage.getItem("userId");
 
   const fetchScript = async (scriptId) => {
@@ -60,6 +62,7 @@ function ScriptDetailPage() {
     fetchScript(id);
   }, [id]);
 
+  // Fetch available prompts when style modal is opened
   useEffect(() => {
     if (showStyleModal && script) {
       fetchPrompts();
@@ -71,15 +74,46 @@ function ScriptDetailPage() {
       const response = await fetch("http://localhost:5000/api/scripts/prompts");
       if (!response.ok) throw new Error("Failed to fetch prompts");
       const data = await response.json();
-      const filtered = data.filter(
-        (p) => p.niche.toLowerCase() === script.niche.toLowerCase()
-      );
-      setAvailablePrompts(filtered);
+      // Store all prompts; filtering will be handled in the UI
+      setAvailablePrompts(data);
     } catch (err) {
       console.error("Error fetching prompts:", err);
       toast.error(err.message);
     }
   };
+
+  // Compute unique niches from the available prompts
+  const uniqueNiches = [
+    "all",
+    ...new Set(availablePrompts.filter((p) => p.niche).map((p) => p.niche)),
+  ];
+
+  // Compute filtered prompts based on filterType and selectedNiche
+  let filteredPrompts = availablePrompts.filter((prompt) => {
+    let passesFilter = true;
+    if (filterType === "all") {
+      // For "all", show only admin prompts (adjust as needed)
+      passesFilter = prompt.is_admin;
+    } else if (filterType === "my" && userId2) {
+      passesFilter =
+        prompt.created_by && prompt.created_by.toString() === userId2;
+    } else if (filterType === "favorites" && userId2) {
+      passesFilter =
+        prompt.favoriteUsers && prompt.favoriteUsers.includes(userId2);
+    }
+    if (selectedNiche !== "all" && prompt.niche) {
+      const nicheRegex = new RegExp(selectedNiche.trim(), "i");
+      passesFilter = passesFilter && nicheRegex.test(prompt.niche);
+    }
+    return passesFilter;
+  });
+
+  // Optionally, sort the filtered prompts (most recent first)
+  filteredPrompts.sort(
+    (a, b) =>
+      new Date(b.createdAt || b.updatedAt) -
+      new Date(a.createdAt || a.updatedAt)
+  );
 
   const markScriptUsed = async () => {
     if (script.status === "unused") {
@@ -126,11 +160,16 @@ function ScriptDetailPage() {
   };
 
   const openStyleModal = () => {
+    // Reset filtering state and available prompts, then open modal
+    setFilterType("all");
+    setSelectedNiche("all");
     setAvailablePrompts([]);
     setShowStyleModal(true);
   };
 
+  // Updated: Send promptTemplate instead of style.
   const handleSelectPrompt = async (prompt) => {
+    console.log("Selected prompt:", prompt);
     try {
       const statusResponse = await fetch(
         `http://localhost:5000/api/subscription/status?userId=${userId2}`
@@ -148,16 +187,15 @@ function ScriptDetailPage() {
 
     setRephraseLoading(true);
     try {
-      const userId = userId2;
       const response = await fetch(
         "http://localhost:5000/api/scripts/rephrase-preview",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId,
+            userId: userId2,
             scriptId: script._id,
-            style: prompt.style,
+            promptTemplate: prompt.promptTemplate,
           }),
         }
       );
@@ -178,14 +216,13 @@ function ScriptDetailPage() {
 
   const acceptRephrasedScript = async () => {
     try {
-      const userId = userId2;
       const response = await fetch(
         "http://localhost:5000/api/scripts/rephrase-save",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId,
+            userId: userId2,
             scriptId: script._id,
             title: previewTitle,
             content: previewContent,
@@ -260,6 +297,11 @@ function ScriptDetailPage() {
     }
   };
 
+  // Handle niche filter changes for the style modal
+  const handleNicheFilterChange = (e) => {
+    setSelectedNiche(e.target.value);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
@@ -284,7 +326,6 @@ function ScriptDetailPage() {
       <div className="relative max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-4 sm:p-8">
         {/* Header Section with Buttons Overlay */}
         <div className="relative mb-6 border-b pb-4">
-          {/* Buttons Overlay: Added flex-wrap for responsiveness */}
           <div className="absolute top-0 left-0 flex flex-wrap gap-2 p-2 z-10 bg-white/80 rounded-b">
             <button
               onClick={handleDownload}
@@ -324,11 +365,9 @@ function ScriptDetailPage() {
               <span>Delete</span>
             </button>
           </div>
-          {/* Title with top padding to avoid overlap */}
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 pt-16 break-words">
             {script.title}
           </h1>
-          {/* Additional Header Details */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
               {script.niche.charAt(0).toUpperCase() + script.niche.slice(1)}
@@ -354,25 +393,71 @@ function ScriptDetailPage() {
         </div>
       </div>
 
-      {/* Modal for Style Selection */}
+      {/* Modal for Style Selection with Filtering Options */}
       {showStyleModal && (
-        <Modal onClose={() => setShowStyleModal(false)}>
-          <div className="p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
+        <Modal
+          onClose={() => setShowStyleModal(false)}
+          customClass="max-w-8xl"
+          marginClass="my-8"
+        >
+          <div className="p-6 nav text-[13px]">
+            <h2 className="sm:text-2xl text-sm text-gray-700 font-bold mb-4">
               Choose a Rephrase Style
             </h2>
-            <p className="mb-4">
-              {rephraseLoading
-                ? "Rephrasing, please wait..."
-                : `Select one of the available prompt styles for the ${script.niche} niche:`}
-            </p>
+            <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFilterType("all")}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                    filterType === "all"
+                      ? "bg-blue-500 text-white"
+                      : "bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  All Prompts
+                </button>
+                <button
+                  onClick={() => setFilterType("my")}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                    filterType === "my"
+                      ? "bg-blue-500 text-white"
+                      : "bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  My Prompts
+                </button>
+                <button
+                  onClick={() => setFilterType("favorites")}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
+                    filterType === "favorites"
+                      ? "bg-blue-500 text-white"
+                      : "bg-[#EEF5FF] font-bold text-black"
+                  }`}
+                >
+                  Favorites
+                </button>
+              </div>
+              <div>
+                <select
+                  value={selectedNiche}
+                  onChange={handleNicheFilterChange}
+                  className="px-3 py-2 border text-xs sm:text-sm rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
+                >
+                  {uniqueNiches.map((niche, index) => (
+                    <option key={index} value={niche}>
+                      {niche === "all" ? "All Niches" : niche}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             {rephraseLoading ? (
               <div className="flex justify-center items-center h-24">
                 <FaSpinner className="animate-spin text-4xl text-green-500" />
               </div>
-            ) : availablePrompts.length > 0 ? (
+            ) : filteredPrompts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {availablePrompts.map((prompt) => (
+                {filteredPrompts.map((prompt) => (
                   <div
                     key={prompt._id}
                     className="border p-4 rounded-lg hover:shadow-lg cursor-pointer"
@@ -386,7 +471,9 @@ function ScriptDetailPage() {
                 ))}
               </div>
             ) : (
-              <p>No prompt templates found for this niche.</p>
+              <p className="text-center text-gray-500">
+                No prompt templates found matching the selected criteria.
+              </p>
             )}
             <div className="flex justify-end gap-4 mt-4">
               <button

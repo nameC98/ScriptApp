@@ -8,6 +8,7 @@ import subscriptionRoutes from "./routes/scription.js";
 import scriptRoutes from "./routes/script.js";
 import tokenRoutes from "./routes/token.js";
 import adminRoutes from "./routes/admin.js";
+import videosRouter from "./routes/videos.js";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/scripts", scriptRoutes);
 app.use("/api/tokens", tokenRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/videos", videosRouter);
 
 // Connect to MongoDB
 mongoose

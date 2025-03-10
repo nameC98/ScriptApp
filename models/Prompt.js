@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const promptSchema = new mongoose.Schema(
   {
-    niche: { type: String, required: true },
+    niche: { type: String, required: true, default: "General" },
     style: { type: String, required: true },
     promptTemplate: { type: String, required: true },
     is_admin: { type: Boolean, default: false },

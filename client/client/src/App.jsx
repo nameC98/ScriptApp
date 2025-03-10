@@ -33,6 +33,7 @@ import PromptsPage from "./pages/Prompts";
 import PromptDetailPage from "./pages/PromptDetailPage";
 import CreatePromptPage from "./pages/CreatePromptPage";
 import PostScript from "./admin/pages/PostScript";
+import TrendingTopics from "./pages/TrendingTopics";
 
 function NavBar({ user }) {
   const [userData, setUserData] = useState([]);
@@ -133,6 +134,15 @@ function NavBar({ user }) {
             }
           >
             Home
+          </NavLink>
+          <NavLink
+            to="/trendingtopics"
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) =>
+              isActive ? `${defaultClass} ${activeClass}` : defaultClass
+            }
+          >
+            Trending Topics
           </NavLink>
           <NavLink
             to="/generate"
@@ -262,6 +272,15 @@ function NavBar({ user }) {
               Generate Script
             </NavLink>
             <NavLink
+              to="/trendingtopics"
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive ? `${defaultClass} ${activeClass}` : defaultClass
+              }
+            >
+              Trending Topics
+            </NavLink>
+            <NavLink
               to="/myscripts"
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
@@ -382,6 +401,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/trendingtopics" element={<TrendingTopics />} />
             <Route path="/generate" element={<CustomScriptForm />} />
             <Route path="/boost-tokens" element={<BoostTokens />} />
             <Route path="/scripts/:id" element={<ScriptDetailPage />} />

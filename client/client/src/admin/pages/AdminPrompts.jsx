@@ -1,7 +1,7 @@
 // src/admin/AdminPrompts.js
 import { useState, useEffect } from "react";
 
-const BASE_URL = "http://localhost:5000/api/admin";
+const BASE_URL = "http://localhost:5000/api/scripts";
 
 function AdminPrompts() {
   const [prompts, setPrompts] = useState([]);
@@ -21,7 +21,7 @@ function AdminPrompts() {
   const fetchPrompts = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/prompts`);
+      const res = await fetch(`http://localhost:5000/api/scripts/prompts`);
       const data = await res.json();
       setPrompts(data);
     } catch (error) {
@@ -30,13 +30,18 @@ function AdminPrompts() {
       setLoading(false);
     }
   };
+
+  console.log("Prompts:", prompts);
+
   useEffect(() => {
     fetchPrompts();
   }, []);
+
   // Handle input changes for the prompt form
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   // Handle form submission: create new or update existing prompt
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,6 +80,7 @@ function AdminPrompts() {
       alert("Error submitting prompt.");
     }
   };
+
   // Populate the form for editing
   const handleEdit = (prompt) => {
     setFormData({
@@ -84,6 +90,7 @@ function AdminPrompts() {
       promptTemplate: prompt.promptTemplate,
     });
   };
+
   // Delete a prompt template
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this prompt?")) return;
@@ -103,12 +110,16 @@ function AdminPrompts() {
       alert("Error deleting prompt.");
     }
   };
+
   // Cancel editing and reset the form
   const handleCancelEdit = () => {
     setFormData({ id: null, niche: "", style: "", promptTemplate: "" });
   };
-  // Filter prompts based on niche and style
+
+  // Filter prompts based on niche and style AND only those with admin flag true
   const filteredPrompts = prompts.filter((prompt) => {
+    // Only include admin prompts
+    if (!prompt.is_admin) return false;
     const matchesNiche = prompt.niche
       .trim()
       .toLowerCase()
@@ -119,6 +130,7 @@ function AdminPrompts() {
       .includes(filterStyle.trim().toLowerCase());
     return matchesNiche && matchesStyle;
   });
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h1 className="text-3xl font-bold mb-6">Prompt Management</h1>

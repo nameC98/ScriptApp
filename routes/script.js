@@ -269,7 +269,7 @@ router.post("/prompts/:id/bookmark", async (req, res) => {
 });
 
 router.post("/prompts/from-youtube", async (req, res) => {
-  const { userId, youtubeUrl, niche, style } = req.body;
+  const { userId, youtubeUrl, style } = req.body;
   console.log("Request Body:", req.body);
 
   if (!userId || !youtubeUrl) {
@@ -340,10 +340,10 @@ router.post("/prompts/from-youtube", async (req, res) => {
       });
     }
 
-    const derivedNiche = niche || "General";
     const derivedStyle = style || "Neutral";
 
-    // Adjust the prompt for generating a style template for title generation
+    // Create a dynamic instruction focusing solely on writing style.
+    // This prompt instructs the AI to generate a prompt style template that emphasizes a specific tone and writing approach.
     const messages = [
       {
         role: "system",
@@ -351,14 +351,18 @@ router.post("/prompts/from-youtube", async (req, res) => {
       },
       {
         role: "user",
-        content: `Based on the following YouTube transcript, generate a prompt style template for creating engaging titles. The template should be designed for the "${derivedNiche}" niche with a "${derivedStyle}" tone. It must include creative guidelines such as using an attention-grabbing hook, incorporating vivid imagery, and maintaining a neutral yet inspiring tone. The style template should serve as a blueprint to generate different titles in the future while keeping the essence of the transcript's message in mind.
-
+        content: `Using the following transcript, generate a prompt style template that emphasizes a ${derivedStyle} writing style. 
+The template should provide creative guidelines to write scripts that are engaging and capture the intended tone. 
+Focus on the style of writing only, including instructions on tone, pacing, sentence structure, and any relevant stylistic elements.
+  
 Transcript:
 ${transcript}
 
-Please provide only the prompt style template. Do not include extra explanations.`,
+Please provide only the prompt style template, with no extra explanations.`,
       },
     ];
+
+    console.log("Messages sent to OpenAI API:", messages);
 
     const responseChat = await client.chat.completions.create({
       messages,
@@ -370,9 +374,8 @@ Please provide only the prompt style template. Do not include extra explanations
 
     const generatedPrompt = responseChat.choices[0].message.content.trim();
 
-    // Save the generated prompt template in the database
+    // Save the generated prompt style template in the database
     const newPrompt = new Prompt({
-      niche: derivedNiche,
       style: derivedStyle,
       promptTemplate: generatedPrompt,
       created_by: userId,
@@ -381,7 +384,7 @@ Please provide only the prompt style template. Do not include extra explanations
     await newPrompt.save();
 
     res.json({
-      message: "Dynamic title prompt style generated and saved successfully",
+      message: "Dynamic prompt style template generated and saved successfully",
       prompt: newPrompt,
     });
   } catch (error) {
@@ -409,7 +412,6 @@ router.get("/prompts/:id", async (req, res) => {
 router.post("/generate", async (req, res) => {
   console.log("Received payload:", req.body);
   const { userId, title, promptTemplate, style, length } = req.body;
-  console.log(req.body);
 
   // Set a default niche value since it's required by the schema
   const niche = req.body.niche || "General";
@@ -428,6 +430,12 @@ router.post("/generate", async (req, res) => {
     user.tokens -= 20;
     await user.save();
 
+    // Build the full sentence for the prompt
+    const fullPrompt = `Create a YouTube script for a ${length} video. The topic is "${title}". Use the following prompt to make the content engaging and informative: ${promptTemplate}. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`;
+
+    // Log the full prompt
+    console.log("Sending prompt to AI:", fullPrompt);
+
     const messages = [
       {
         role: "system",
@@ -435,7 +443,7 @@ router.post("/generate", async (req, res) => {
       },
       {
         role: "user",
-        content: `Create a YouTube script for a ${length} video. The topic is "${title}". Use the following prompt to make the content engaging and informative: ${promptTemplate}. Please provide a complete script that includes only the spoken content of the host without any production instructions, stage directions, annotations, or formatting cues.`,
+        content: fullPrompt,
       },
     ];
     let responseChat = await client.chat.completions.create({
@@ -572,37 +580,30 @@ router.post("/rephrase", async (req, res) => {
 
 // POST: Rephrase preview
 router.post("/rephrase-preview", async (req, res) => {
-  const { userId, scriptId, style } = req.body;
-  console.log("rephrase-preview", req.body);
-  if (!userId || !scriptId || !style) {
+  const { userId, scriptId, promptTemplate } = req.body;
+  console.log("rephrase-preview payload:", req.body);
+  if (!userId || !scriptId || !promptTemplate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
   try {
     const originalScript = await Script.findById(scriptId);
-    if (!originalScript)
+    if (!originalScript) {
       return res.status(404).json({ error: "Script not found" });
-
-    // Look up a prompt template for the given style if available
-    const promptTemplateDoc = await Prompt.findOne({
-      niche: originalScript.niche,
-      style,
-    });
-
-    let prompt;
-    if (promptTemplateDoc) {
-      if (promptTemplateDoc.promptTemplate.includes("{{content}}")) {
-        prompt = promptTemplateDoc.promptTemplate.replace(
-          "{{content}}",
-          originalScript.content
-        );
-      } else {
-        prompt = `${promptTemplateDoc.promptTemplate}\n\n${originalScript.content}`;
-      }
-    } else {
-      prompt = `Please rephrase the following YouTube script in a formal tone. Do not ask any clarifying questions—simply output the rephrased script:\n\n${originalScript.content}`;
     }
 
-    console.log("Final prompt (combined style + script):", prompt);
+    // Prepare the prompt to instruct the AI to rephrase the content in the given style
+    // while preserving the original message.
+    let prompt;
+    if (promptTemplate.includes("{{content}}")) {
+      // Replace the placeholder with the original script content
+      prompt = promptTemplate.replace("{{content}}", originalScript.content);
+    } else {
+      // Append the original content if no placeholder exists
+      prompt = `${promptTemplate}\n\nRephrase the following script in the above style, ensuring that the original meaning and message are maintained:\n\n${originalScript.content}`;
+    }
+
+    console.log("Final prompt (combined promptTemplate + script):", prompt);
+
     const messages = [
       {
         role: "system",
