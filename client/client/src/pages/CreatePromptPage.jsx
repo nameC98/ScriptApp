@@ -17,7 +17,7 @@ function CreatePromptPage() {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
 
-  // Manual prompt submission handler (unchanged)
+  // Manual prompt submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!niche || !style || !promptTemplate) {
@@ -36,14 +36,13 @@ function CreatePromptPage() {
       if (!response.ok) {
         throw new Error("Failed to create prompt");
       }
-      navigate("/prompts"); // Redirect after successful creation
+      navigate("/prompts");
     } catch (err) {
       setManualError(err.message);
     }
   };
 
   const handleAutoGenerate = async () => {
-    // Only require YouTube URL; use defaults if niche or style are empty.
     if (!youtubeUrl) {
       setAutoError("Please provide a YouTube URL for auto-generation.");
       return;
@@ -77,7 +76,6 @@ function CreatePromptPage() {
     }
   };
 
-  // Copy the generated prompt to the manual form
   const handleUseGeneratedPrompt = () => {
     setPromptTemplate(generatedPrompt);
   };
@@ -85,7 +83,6 @@ function CreatePromptPage() {
   return (
     <div className="bg-[#EEF5FF] min-h-screen p-4">
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* Manual Prompt Creation Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-4">
             Create New Prompt (Manual)
@@ -124,14 +121,13 @@ function CreatePromptPage() {
             </div>
             <button
               type="submit"
-              className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+              className="w-full bg-[#4A4A4A] text-white py-2 rounded"
             >
               Create Prompt
             </button>
           </form>
         </div>
 
-        {/* Automatic Prompt Generation Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">
             Auto-Generate Prompt from YouTube
@@ -156,7 +152,7 @@ function CreatePromptPage() {
             type="button"
             onClick={handleAutoGenerate}
             disabled={autoLoading}
-            className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded"
+            className="w-full  bg-[#4A4A4A]  text-white py-2 rounded"
           >
             {autoLoading ? "Generating..." : "Generate Prompt Automatically"}
           </button>

@@ -582,27 +582,33 @@ router.post("/rephrase", async (req, res) => {
 router.post("/rephrase-preview", async (req, res) => {
   const { userId, scriptId, promptTemplate } = req.body;
   console.log("rephrase-preview payload:", req.body);
+
   if (!userId || !scriptId || !promptTemplate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
+
   try {
     const originalScript = await Script.findById(scriptId);
     if (!originalScript) {
       return res.status(404).json({ error: "Script not found" });
     }
 
-    // Prepare the prompt to instruct the AI to rephrase the content in the given style
-    // while preserving the original message.
-    let prompt;
+    // Log the fetched original script
+    console.log("Original Script:", originalScript);
+
+    // Build the final combined prompt.
+    let finalPrompt;
     if (promptTemplate.includes("{{content}}")) {
-      // Replace the placeholder with the original script content
-      prompt = promptTemplate.replace("{{content}}", originalScript.content);
+      finalPrompt = promptTemplate.replace(
+        "{{content}}",
+        originalScript.content
+      );
     } else {
-      // Append the original content if no placeholder exists
-      prompt = `${promptTemplate}\n\nRephrase the following script in the above style, ensuring that the original meaning and message are maintained:\n\n${originalScript.content}`;
+      finalPrompt = `${promptTemplate}\n\nRephrase the following script in the above style, ensuring that the original meaning and message are maintained:\n\n${originalScript.content}`;
     }
 
-    console.log("Final prompt (combined promptTemplate + script):", prompt);
+    // Log the final combined statement (prompt) sent to the backend.
+    console.log("Final combined statement sent to backend:", finalPrompt);
 
     const messages = [
       {
@@ -611,9 +617,11 @@ router.post("/rephrase-preview", async (req, res) => {
       },
       {
         role: "user",
-        content: prompt,
+        content: finalPrompt,
       },
     ];
+
+    // Log the messages array that will be sent to the OpenAI API.
     console.log("Messages sent to OpenAI API:", messages);
 
     const responseChat = await client.chat.completions.create({

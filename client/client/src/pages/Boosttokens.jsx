@@ -63,40 +63,47 @@ export default function BoostTokens() {
   };
 
   return (
-    <div className="h-[90vh] nav bg-[#EEF5FF] flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white rounded-xl border-2 border-gray-200 p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4 flex items-center justify-center text-gray-600 gap-2">
-          <FaBolt className="text-gray-600 " />
-          Boost Your Tokens
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Need more tokens before your monthly cycle renews? Boost your tokens
-          instantly!
-        </p>
-
-        {error && (
-          <div className="text-red-500 border border-red-300 rounded p-2 mb-4">
-            {error}
+    <div className=" flex   mt-10 items-center justify-center p-6">
+      <div className="w-full max-w-5xl bg-white rounded-xl border border-gray-200 p-8 shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          {/* Left Side: Text Information */}
+          <div className="flex-1 text-center md:text-left space-y-4">
+            <h1 className="text-3xl font-bold flex items-center justify-center md:justify-start text-gray-700 gap-2">
+              <FaBolt className="text-gray-600" />
+              Boost Your Tokens
+            </h1>
+            <p className="text-gray-600">
+              Need more tokens before your monthly cycle renews? Boost your
+              tokens instantly!
+            </p>
+            {error && (
+              <div className="text-red-500 border border-red-300 rounded p-2">
+                {error}
+              </div>
+            )}
           </div>
-        )}
 
-        {userTokens >= 5 ? (
-          <p className="text-green-600 font-semibold mb-4">
-            You have sufficient tokens ({userTokens}). Boosting is unavailable.
-          </p>
-        ) : (
-          <button
-            onClick={handleBoost}
-            disabled={loading}
-            className="gradient-button hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-md shadow w-full transition-colors"
-          >
-            {loading ? "Processing..." : "Boost Tokens"}
-          </button>
-        )}
-
-        <p className="text-sm text-gray-500 mt-4">
-          *Available only for active subscribers
-        </p>
+          {/* Right Side: Boost Button */}
+          <div className="flex-1 flex flex-col items-center gap-4">
+            {userTokens >= 5 ? (
+              <p className="text-green-600 font-semibold">
+                You have sufficient tokens ({userTokens}). Boosting is
+                unavailable.
+              </p>
+            ) : (
+              <button
+                onClick={handleBoost}
+                disabled={loading}
+                className="w-full md:w-auto bg-[#4A4A4A] text-white font-semibold py-3 px-8 rounded-md shadow transition-colors"
+              >
+                {loading ? "Processing..." : "Boost Tokens"}
+              </button>
+            )}
+            <p className="text-sm text-gray-500">
+              *Available only for active subscribers
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,10 @@
   font-style: normal;
 }
 
+body {
+  background: "#EEF5FF";
+}
+
 .nav {
   font-family: "Poppins", serif;
   font-weight: 600;

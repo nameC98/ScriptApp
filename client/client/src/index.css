@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background: "#EEF5FF";
+}
+
 @layer utilities {
   @keyframes glow {
     0% {
@@ -17,4 +21,113 @@
   .animate-glow {
     animation: glow 2s infinite ease-in-out;
   }
+}
+
+/* global.css */
+:root {
+  /* Colors */
+  --color-bg: #eef5ff;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-light: #e0e0e0;
+  --color-gray-dark: #4a4a4a;
+
+  /* Typography */
+  --font-family: "Inter", sans-serif; /* Updated font-family */
+  --font-size-small: 12px;
+  --font-size-base: 14px;
+  --font-size-large: 18px;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+}
+
+.inter-custom {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400; /* Replace with desired weight (e.g., 100, 200, ..., 900) */
+  font-style: normal;
+}
+
+/* Global body and container styling */
+body {
+  background-color: var(--color-bg);
+  font-family: var(--font-family);
+  color: var(--color-black);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Button Styles */
+.btn {
+  background-color: var(--color-gray-light);
+  color: var(--color-black);
+  border: 1px solid var(--color-gray-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+  background-color: var(--color-gray-dark);
+  color: var(--color-white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Active filter button */
+.active-filter {
+  background-color: var(--color-black) !important;
+  color: var(--color-white) !important;
+}
+
+/* Input and Select Styles */
+.input,
+.select {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-dark);
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: var(--font-size-base);
+  color: var(--color-black);
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--color-white);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Text Utilities */
+.text-small {
+  font-size: var(--font-size-small);
+}
+
+.text-base {
+  font-size: var(--font-size-base);
+}
+
+.text-large {
+  font-size: var(--font-size-large);
+}
+
+.text-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.text-muted {
+  color: var(--color-gray-dark);
 }

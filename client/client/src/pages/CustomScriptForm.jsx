@@ -209,85 +209,91 @@ function CustomScriptForm() {
   };
 
   return (
-    <div className="h-[90vh] text-gray-500 nav text-[13px] bg-[#EEF5FF] flex items-center justify-center p-6">
-      <div className="bg-white shadow-md rounded-lg sm:p-8 py-6 px-4 w-full max-w-2xl">
+    <div className=" text-gray-500 mt-10 flex justify-center nav text-[13px] bg-[#EEF5FF]   p-6">
+      <div className="bg-white border-2 rounded-lg sm:p-8 py-6 px-4 w-full max-w-6xl">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">
           Generate Script
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Script Length */}
-          <div>
-            <label
-              htmlFor="length"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Script Length:
-            </label>
-            <select
-              id="length"
-              value={length}
-              onChange={(e) => setLength(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-            >
-              <option value="">Select Length</option>
-              <option value="short">Short (1-2 minutes)</option>
-              <option value="medium">Medium (3-5 minutes)</option>
-              <option value="long">Long (6+ minutes)</option>
-            </select>
-          </div>
+          <div className="flex flex-col md:flex-row md:gap-4">
+            {/* Left Side: Script Length & Topic/Title */}
+            <div className="flex-1 space-y-4">
+              {/* Script Length */}
+              <div>
+                <label
+                  htmlFor="length"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Script Length:
+                </label>
+                <select
+                  id="length"
+                  value={length}
+                  onChange={(e) => setLength(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">Select Length</option>
+                  <option value="short">Short (1-2 minutes)</option>
+                  <option value="medium">Medium (3-5 minutes)</option>
+                  <option value="long">Long (6+ minutes)</option>
+                </select>
+              </div>
 
-          {/* Topic/Title */}
-          <div>
-            <label
-              htmlFor="topic"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Topic/Title:
-            </label>
-            <input
-              id="topic"
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Enter topic or title"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-            />
-          </div>
-
-          {/* YouTube Channel (optional) */}
-
-          {/* Prompt Style */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Prompt Style:
-            </label>
-            <div className="flex items-center mt-1">
-              <input
-                type="text"
-                value={selectedPrompt ? selectedPrompt.promptTemplate : ""}
-                readOnly
-                placeholder="No prompt style selected"
-                className="flex-1 w-[20px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={openPromptStyleModal}
-                className="ml-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
-              >
-                {selectedPrompt ? "Change Prompt" : "Select Prompt"}
-              </button>
+              {/* Topic/Title */}
+              <div>
+                <label
+                  htmlFor="topic"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Topic/Title:
+                </label>
+                <input
+                  id="topic"
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="Enter topic or title"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Generate Script Button */}
-          <div className="text-center">
-            <button
-              type="submit"
-              disabled={isGenerating}
-              className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold py-3 rounded-md transition duration-200"
-            >
-              {isGenerating ? "Generating..." : "Generate Script"}
-            </button>
+            {/* Right Side: Prompt Style & Generate Script Button */}
+            <div className="flex-1 space-y-4">
+              {/* Prompt Style */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Prompt Style:
+                </label>
+                <div className="flex items-center mt-1">
+                  <input
+                    type="text"
+                    value={selectedPrompt ? selectedPrompt.promptTemplate : ""}
+                    readOnly
+                    placeholder="No prompt style selected"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={openPromptStyleModal}
+                    className="ml-3 bg-[#4A4A4A] text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+                  >
+                    {selectedPrompt ? "Change Prompt" : "Select Prompt"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Generate Script Button */}
+              <div className="text-center">
+                <button
+                  type="submit"
+                  disabled={isGenerating}
+                  className="w-full mt-5 bg-[#4A4A4A] text-white font-semibold py-2 rounded-md transition duration-200"
+                >
+                  {isGenerating ? "Generating..." : "Generate Script"}
+                </button>
+              </div>
+            </div>
           </div>
         </form>
 
@@ -301,7 +307,7 @@ function CustomScriptForm() {
           customClass="max-w-8xl"
           marginClass="my-8"
         >
-          <div className="p-6 nav text-[13px]">
+          <div className="p-6 text-sm">
             <h2 className="sm:text-2xl text-sm text-gray-700 font-bold mb-4">
               Choose a Prompt Style
             </h2>
@@ -310,30 +316,20 @@ function CustomScriptForm() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilterType("all")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "all"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
-                  }`}
+                  className={`btn ${filterType === "all" && "active-filter"}`}
                 >
                   All Prompts
                 </button>
                 <button
                   onClick={() => setFilterType("my")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "my"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
-                  }`}
+                  className={`btn ${filterType === "my" && "active-filter"}`}
                 >
                   My Prompts
                 </button>
                 <button
                   onClick={() => setFilterType("favorites")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "favorites"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
+                  className={`btn ${
+                    filterType === "favorites" && "active-filter"
                   }`}
                 >
                   Favorites
@@ -344,7 +340,7 @@ function CustomScriptForm() {
                 <select
                   value={selectedNiche}
                   onChange={handleNicheFilterChange}
-                  className="px-3 py-2 border text-xs sm:text-sm rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
+                  className="select"
                 >
                   {uniqueNiches.map((niche, index) => (
                     <option key={index} value={niche}>
@@ -374,7 +370,7 @@ function CustomScriptForm() {
             <div className="flex justify-end gap-4 mt-4">
               <button
                 onClick={() => setShowPromptStyleModal(false)}
-                className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
+                className="btn"
               >
                 Cancel
               </button>
@@ -390,7 +386,7 @@ function CustomScriptForm() {
           customClass="max-w-4xl h-[80vh]"
           marginClass="my-4"
         >
-          <div className="p-6 nav text-[13px]">
+          <div className="p-6 text-sm">
             <h2 className="sm:text-2xl text-sm text-gray-700 font-bold mb-4">
               {viewingPrompt.style} Prompt Details
             </h2>
@@ -403,10 +399,7 @@ function CustomScriptForm() {
               </p>
             )}
             <div className="flex justify-end gap-4 mt-4">
-              <button
-                onClick={() => setViewingPrompt(null)}
-                className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={() => setViewingPrompt(null)} className="btn">
                 Close
               </button>
             </div>

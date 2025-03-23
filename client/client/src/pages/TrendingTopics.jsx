@@ -63,7 +63,6 @@ const TrendingTopics = () => {
       return { label: "Unknown", color: "#6c757d" }; // Gray color for undefined cases
     }
 
-    // Ensure we check `video.rank`
     if (video.rank) {
       if (video.rank === "Excellent")
         return { label: "Excellent", color: "#28a745" };
@@ -72,7 +71,6 @@ const TrendingTopics = () => {
       if (video.rank === "Good") return { label: "Good", color: "#dc3545" };
     }
 
-    // Fallback based on trendingScore
     const score = video.trendingScore || 0;
     if (score >= 15) return { label: "Excellent", color: "#28a745" };
     if (score >= 8) return { label: "Very Good", color: "#ffc107" };
@@ -86,154 +84,83 @@ const TrendingTopics = () => {
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      {/* Attractive & Responsive Filter Card */}
-      <div
-        style={{
-          backgroundColor: "#f7f7f7",
-          padding: "20px",
-          borderRadius: "10px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          marginBottom: "20px",
-        }}
-      >
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-          <div style={{ flex: "1 1 200px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              Niche
-            </label>
-            <select
-              value={niche}
-              onChange={handleNicheChange}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-            >
-              <option value="all">All</option>
-              {niches.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div style={{ flex: "1 1 150px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              Sort By
-            </label>
-            <select
-              value={sort}
-              onChange={handleSortChange}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-            >
-              <option value="rank">Trending Score</option>
-              <option value="new">Newest</option>
-            </select>
-          </div>
-          <div style={{ flex: "1 1 150px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              Rank
-            </label>
-            <select
-              value={rank}
-              onChange={handleRankChange}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-            >
-              <option value="All">All</option>
-              <option value="Excellent">Excellent</option>
-              <option value="Very Good">Very Good</option>
-              <option value="Good">Good</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Video Cards: Left-aligned, showing title with badge and created date in header */}
-      {loading ? (
-        <p>Loading trending videos...</p>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "20px",
-            justifyContent: "flex-start",
-          }}
-        >
-          {videos.map((video) => {
-            const rankObj = getRankCategory(video);
-            return (
-              <div
-                key={video._id}
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  width: "300px",
-                  padding: "15px",
-                  backgroundColor: "#fff",
-                }}
+    <div className="p-6 bg-[var(--color-bg)] min-h-screen">
+      <div className="container mx-auto">
+        {/* Filter Card */}
+        <div className="card mb-6 p-4">
+          <div className="flex flex-wrap gap-6">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block mb-1 font-bold">Niche</label>
+              <select
+                value={niche}
+                onChange={handleNicheChange}
+                className="select w-full"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <div style={{ fontSize: "0.8em", color: "#555" }}>
-                    {formatDate(video.createdAt)}
-                  </div>
-                  <div
-                    style={{
-                      background: rankObj.color,
-                      color: "#fff",
-                      padding: "3px 8px",
-                      borderRadius: "12px",
-                      fontSize: "0.8em",
-                    }}
-                  >
-                    {rankObj.label}
-                  </div>
-                </div>
-                <h3 style={{ margin: "0", color: "black" }}>{video.title}</h3>
-              </div>
-            );
-          })}
+                <option value="all">All</option>
+                {niches.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[150px]">
+              <label className="block mb-1 font-bold">Sort By</label>
+              <select
+                value={sort}
+                onChange={handleSortChange}
+                className="select w-full"
+              >
+                <option value="rank">Trending Score</option>
+                <option value="new">Newest</option>
+              </select>
+            </div>
+            <div className="flex-1 min-w-[150px]">
+              <label className="block mb-1 font-bold">Rank</label>
+              <select
+                value={rank}
+                onChange={handleRankChange}
+                className="select w-full"
+              >
+                <option value="All">All</option>
+                <option value="Excellent">Excellent</option>
+                <option value="Very Good">Very Good</option>
+                <option value="Good">Good</option>
+              </select>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Video Cards */}
+        {loading ? (
+          <p className="text-center">Loading trending videos...</p>
+        ) : (
+          <div className="flex flex-wrap gap-6 justify-start">
+            {videos.map((video) => {
+              const rankObj = getRankCategory(video);
+              return (
+                <div
+                  key={video._id}
+                  className="card w-[300px] p-4 bg-[var(--color-white)]"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="text-sm text-muted">
+                      {formatDate(video.createdAt)}
+                    </div>
+                    <div
+                      className="text-xs text-white px-2 py-1 rounded-full"
+                      style={{ backgroundColor: rankObj.color }}
+                    >
+                      {rankObj.label}
+                    </div>
+                  </div>
+                  <h3 className="text-lg text-black mb-0">{video.title}</h3>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

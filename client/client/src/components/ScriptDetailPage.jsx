@@ -38,6 +38,14 @@ function ScriptDetailPage() {
   const [selectedNiche, setSelectedNiche] = useState("all");
   const userId2 = localStorage.getItem("userId");
 
+  // Define the default prompt for "No Style" option
+  const defaultPrompt = {
+    _id: "none",
+    style: "No Style",
+    promptTemplate:
+      "Rephrase the following script preserving its original meaning:",
+  };
+
   const fetchScript = async (scriptId) => {
     try {
       const response = await fetch(
@@ -92,7 +100,6 @@ function ScriptDetailPage() {
   let filteredPrompts = availablePrompts.filter((prompt) => {
     let passesFilter = true;
     if (filterType === "all") {
-      // For "all", show only admin prompts (adjust as needed)
       passesFilter = prompt.is_admin;
     } else if (filterType === "my" && userId2) {
       passesFilter =
@@ -400,7 +407,7 @@ function ScriptDetailPage() {
           customClass="max-w-8xl"
           marginClass="my-8"
         >
-          <div className="p-6 nav text-[13px]">
+          <div className="p-6 text-sm">
             <h2 className="sm:text-2xl text-sm text-gray-700 font-bold mb-4">
               Choose a Rephrase Style
             </h2>
@@ -408,30 +415,20 @@ function ScriptDetailPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setFilterType("all")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "all"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
-                  }`}
+                  className={`btn ${filterType === "all" && "active-filter"}`}
                 >
-                  All Prompts
+                  All Prompt
                 </button>
                 <button
                   onClick={() => setFilterType("my")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "my"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
-                  }`}
+                  className={`btn ${filterType === "my" && "active-filter"}`}
                 >
-                  My Prompts
+                  My Prompt
                 </button>
                 <button
                   onClick={() => setFilterType("favorites")}
-                  className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                    filterType === "favorites"
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#EEF5FF] font-bold text-black"
+                  className={`btn ${
+                    filterType === "favorites" && "active-filter"
                   }`}
                 >
                   Favorites
@@ -441,7 +438,7 @@ function ScriptDetailPage() {
                 <select
                   value={selectedNiche}
                   onChange={handleNicheFilterChange}
-                  className="px-3 py-2 border text-xs sm:text-sm rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
+                  className="select"
                 >
                   {uniqueNiches.map((niche, index) => (
                     <option key={index} value={niche}>
@@ -455,31 +452,43 @@ function ScriptDetailPage() {
               <div className="flex justify-center items-center h-24">
                 <FaSpinner className="animate-spin text-4xl text-green-500" />
               </div>
-            ) : filteredPrompts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredPrompts.map((prompt) => (
-                  <div
-                    key={prompt._id}
-                    className="border p-4 rounded-lg hover:shadow-lg cursor-pointer"
-                    onClick={() => handleSelectPrompt(prompt)}
-                  >
-                    <h3 className="text-lg font-bold mb-2">{prompt.style}</h3>
-                    <p className="text-sm text-gray-600">
-                      {prompt.promptTemplate.substring(0, 100)}...
-                    </p>
-                  </div>
-                ))}
-              </div>
             ) : (
-              <p className="text-center text-gray-500">
-                No prompt templates found matching the selected criteria.
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* "No Style" option */}
+                <div
+                  key="none"
+                  className="border p-4 rounded-lg bg-indigo-200 hover:shadow-lg cursor-pointer"
+                  onClick={() => handleSelectPrompt(defaultPrompt)}
+                >
+                  <h3 className="text-lg font-bold mb-2">
+                    {defaultPrompt.style}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Rephrase script without any prompt style.
+                  </p>
+                </div>
+                {filteredPrompts.length > 0 ? (
+                  filteredPrompts.map((prompt) => (
+                    <div
+                      key={prompt._id}
+                      className="border p-4 rounded-lg bg-white hover:shadow-lg cursor-pointer"
+                      onClick={() => handleSelectPrompt(prompt)}
+                    >
+                      <h3 className="text-lg font-bold mb-2">{prompt.style}</h3>
+                      <p className="text-sm text-gray-600">
+                        {prompt.promptTemplate.substring(0, 100)}...
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500">
+                    No prompt templates found matching the selected criteria.
+                  </p>
+                )}
+              </div>
             )}
             <div className="flex justify-end gap-4 mt-4">
-              <button
-                onClick={() => setShowStyleModal(false)}
-                className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={() => setShowStyleModal(false)} className="btn">
                 Cancel
               </button>
             </div>
@@ -499,7 +508,7 @@ function ScriptDetailPage() {
                 type="text"
                 value={previewTitle}
                 onChange={(e) => setPreviewTitle(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="input"
                 placeholder="Script Title"
               />
             </div>
@@ -507,20 +516,17 @@ function ScriptDetailPage() {
               <textarea
                 value={previewContent}
                 onChange={(e) => setPreviewContent(e.target.value)}
-                className="w-full h-48 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="textarea h-48"
                 placeholder="Script Content"
               />
             </div>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={cancelRephrasedScript}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={cancelRephrasedScript} className="btn">
                 Cancel
               </button>
               <button
                 onClick={acceptRephrasedScript}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-green-600 transition-colors"
+                className="btn active-filter"
               >
                 Accept
               </button>
@@ -544,7 +550,7 @@ function ScriptDetailPage() {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="input"
                 placeholder="Script Title"
               />
             </div>
@@ -552,21 +558,15 @@ function ScriptDetailPage() {
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full h-60 sm:h-96 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="textarea h-60 sm:h-96"
                 placeholder="Script Content"
               />
             </div>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={() => setShowEditModal(false)} className="btn">
                 Cancel
               </button>
-              <button
-                onClick={handleAcceptEdit}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
+              <button onClick={handleAcceptEdit} className="btn active-filter">
                 Save
               </button>
             </div>

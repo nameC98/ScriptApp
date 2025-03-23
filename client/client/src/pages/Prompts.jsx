@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import PromptCard from "../components/PromptCard";
-
 function PromptsPage() {
   const [prompts, setPrompts] = useState([]);
   const [filteredPrompts, setFilteredPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // "all" => admin prompts; "my" => user-created prompts; "favorites" => bookmarked prompts
-
   const [filterType, setFilterType] = useState(
     () => localStorage.getItem("filterType") || "all"
   );
@@ -65,21 +63,16 @@ function PromptsPage() {
   };
 
   // Update filtered prompts when filters or prompts change
-  // Update filtered prompts when filters or prompts change
   useEffect(() => {
     let filtered = [];
 
-    // Determine which prompts to show based on filterType
     if (filterType === "all") {
-      // Accept everything (all prompts)
       filtered = prompts.filter((prompt) => prompt.is_admin);
     } else if (filterType === "my" && userId) {
-      // Show only user-created prompts
       filtered = prompts.filter(
         (prompt) => prompt.created_by && prompt.created_by.toString() === userId
       );
     } else if (filterType === "favorites" && userId) {
-      // Show bookmarked prompts
       filtered = prompts.filter(
         (prompt) =>
           prompt.favoriteUsers && prompt.favoriteUsers.includes(userId)
@@ -96,14 +89,6 @@ function PromptsPage() {
       );
     }
 
-    // (Optional) If you have a separate style filter, you can apply it similarly:
-    // if (filterStyle.trim() !== "") {
-    //   const styleRegex = new RegExp(filterStyle.trim(), "i");
-    //   filtered = filtered.filter((prompt) =>
-    //     styleRegex.test(prompt.style.trim())
-    //   );
-    // }
-
     // Finally, sort by createdAt (or updatedAt if createdAt is missing)
     filtered.sort(
       (a, b) =>
@@ -115,6 +100,15 @@ function PromptsPage() {
   }, [filterType, selectedNiche, prompts, userId]);
 
   // Get unique niches for the dropdown
+  const promptsForNiches = prompts.filter(
+    (prompt) =>
+      prompt.is_admin ||
+      (prompt.created_by && prompt.created_by.toString() === userId)
+  );
+  const uniqueNiches = [
+    "all",
+    ...new Set(promptsForNiches.map((p) => p.niche)),
+  ];
 
   if (loading) {
     return (
@@ -131,19 +125,9 @@ function PromptsPage() {
       </div>
     );
   }
-  const promptsForNiches = prompts.filter(
-    (prompt) =>
-      prompt.is_admin ||
-      (prompt.created_by && prompt.created_by.toString() === userId)
-  );
-  const uniqueNiches = [
-    "all",
-    ...new Set(promptsForNiches.map((p) => p.niche)),
-  ];
-  // Generate unique niches from the filtered prompts
 
   return (
-    <div className="bg-[#EEF5FF] min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-[var(--color-bg)]">
       <div className="container mx-auto max-w-full p-4 sm:p-6 lg:p-8 flex flex-col">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -154,46 +138,34 @@ function PromptsPage() {
         </div>
 
         {/* Filters Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-[var(--color-gray-light)] rounded-lg p-4">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilterType("all")}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                filterType === "all"
-                  ? "bg-blue-500 text-white"
-                  : "bg-[#EEF5FF] font-bold text-black"
-              }`}
+              className={`btn ${filterType === "all" && "active-filter"}`}
             >
               All Prompts
             </button>
             <button
               onClick={() => setFilterType("my")}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                filterType === "my"
-                  ? "bg-blue-500 text-white"
-                  : "bg-[#EEF5FF] font-bold text-black"
-              }`}
+              className={`btn ${filterType === "my" && "active-filter"}`}
             >
               My Prompts
             </button>
             <button
               onClick={() => setFilterType("favorites")}
-              className={`px-4 py-2 rounded-full text-xs sm:text-sm ${
-                filterType === "favorites"
-                  ? "bg-blue-500 text-white"
-                  : "bg-[#EEF5FF] font-bold text-black"
-              }`}
+              className={`btn ${filterType === "favorites" && "active-filter"}`}
             >
               Favorites
             </button>
           </div>
 
           {/* Niche Filter Dropdown */}
-          <div>
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={selectedNiche}
               onChange={(e) => setSelectedNiche(e.target.value)}
-              className="px-3 py-2 border text-xs sm:text-sm rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
+              className="select"
             >
               {uniqueNiches.map((niche, index) => (
                 <option key={index} value={niche}>
@@ -204,14 +176,9 @@ function PromptsPage() {
           </div>
 
           {/* Create New Prompt Button */}
-          <div>
-            <NavLink
-              to="/create-prompt"
-              className="px-4 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white text-xs sm:text-sm font-semibold"
-            >
-              Create New Prompt
-            </NavLink>
-          </div>
+          <NavLink to="/create-prompt" className="btn active-filter ">
+            Create New Prompt
+          </NavLink>
         </div>
 
         {/* Prompts Grid */}

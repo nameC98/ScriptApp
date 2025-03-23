@@ -1,13 +1,14 @@
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 
+// Using only gray scale colors for the niche badge (you can adjust as needed)
 const nicheColors = {
-  tech: "bg-blue-200 text-blue-800",
-  gaming: "bg-purple-200 text-purple-800",
-  travel: "bg-yellow-200 text-yellow-800",
-  finance: "bg-green-200 text-green-800",
-  lifestyle: "bg-pink-200 text-pink-800",
-  default: "bg-gray-200 text-gray-800",
+  tech: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
+  gaming: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
+  travel: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
+  finance: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
+  lifestyle: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
+  default: "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]",
 };
 
 function ScriptCard({ script }) {
@@ -18,35 +19,26 @@ function ScriptCard({ script }) {
     navigate(`/scripts/${script._id}`);
   };
 
-  // Prevent card click when clicking the rephrase button
+  // Prevent card click when clicking the modify or download buttons
   const handleModify = (e) => {
     e.stopPropagation();
     alert("Modification process triggered for script ID: " + script._id);
   };
 
-  // Prevent card click when clicking the download button, then trigger download
   const handleDownload = (e) => {
     e.stopPropagation();
-    // Replace with your actual download logic or endpoint
     window.open(`/api/download-script/${script._id}`, "_blank");
   };
 
   return (
     <div
-      className="bg-white shadow-lg rounded-lg  p-3 hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between h-full cursor-pointer"
+      className="card border-2 cursor-pointer flex flex-col justify-between h-full"
       onClick={handleCardClick}
     >
-      {/* Title & Snippet */}
       <div>
-        <h3 className=" font-bold text-gray-800 nav  text-[14px]">
-          {script.title}
-        </h3>
-        <p className="mt-2 text-gray-600 nav  text-[13px] ">
-          {script.snippet}....
-        </p>
+        <h3 className="text-bold text-base">{script.title}</h3>
+        <p className="mt-2 text-muted text-small">{script.snippet}....</p>
       </div>
-
-      {/* Footer: Badges on the left, Buttons on the right */}
       <div className="mt-6 flex justify-between items-center">
         <div className="flex space-x-2">
           <span
@@ -56,45 +48,27 @@ function ScriptCard({ script }) {
           >
             {script.niche.charAt(0).toUpperCase() + script.niche.slice(1)}
           </span>
-          {/* {script.isAdmin && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-200 text-indigo-800">
-              Admin
-            </span>
-          )} */}
           <span
             className={`text-xs font-semibold px-3 py-1 rounded-full ${
               script.status === "used"
-                ? "bg-[#ffd200] text-yellow-900"
-                : "bg-green-200 text-green-800"
+                ? "bg-[var(--color-gray-dark)] text-[var(--color-white)]"
+                : "bg-[var(--color-gray-light)] text-[var(--color-gray-dark)]"
             }`}
           >
             {script.status === "used" ? "Used" : "Unused"}
           </span>
         </div>
-
-        {/* Action Button: Admin scripts only allow Download; non-admin follow normal logic */}
-        {/* {script.isAdmin ? (
-          <button
-            onClick={handleDownload}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold text-[12px] px-4 py-2 font-serif rounded-lg transition duration-200"
-          >
+        {/* Uncomment and adjust the following buttons if needed */}
+        {/*
+        <div className="flex space-x-2">
+          <button onClick={handleDownload} className="btn">
             Download
           </button>
-        ) : script.status === "used" ? (
-          <button
-            onClick={handleModify}
-            className="bg-[#3E54A3] hover:bg-blue-600 text-white font-semibold text-[12px] font-serif px-4 py-2 rounded-lg transition duration-200"
-          >
-            Rephrase
+          <button onClick={handleModify} className="btn">
+            Modify
           </button>
-        ) : (
-          <button
-            onClick={handleDownload}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold text-[12px] px-4 py-2 font-serif rounded-lg transition duration-200"
-          >
-            Download
-          </button>
-        )} */}
+        </div>
+        */}
       </div>
     </div>
   );
@@ -107,7 +81,7 @@ ScriptCard.propTypes = {
     snippet: PropTypes.string.isRequired,
     niche: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
-    isAdmin: PropTypes.bool, // indicates if this script was posted by an admin
+    isAdmin: PropTypes.bool,
   }).isRequired,
 };
 

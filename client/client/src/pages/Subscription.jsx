@@ -11,7 +11,6 @@ export default function Subscription() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Handle Subscribe / Checkout with Stripe
   const handleSubscribe = async () => {
     setLoading(true);
     setError(null);
@@ -26,7 +25,6 @@ export default function Subscription() {
       );
 
       const data = await response.json();
-      // If there's an error from the server, display it
       if (!response.ok) {
         throw new Error(data.error || "Failed to create checkout session");
       }
@@ -49,64 +47,62 @@ export default function Subscription() {
   };
 
   return (
-    <div className="h-[90vh] nav text-[13px] bg-[#EEF5FF] flex items-center justify-center p-6">
-      {/* Outer container to center the card */}
-      <div className="relative w-80 bg-gray-900 text-white rounded-xl shadow-2xl py-[6rem] px-6">
-        {/* Corner circles */}
-        <div className="absolute top-0 left-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
-        <div className="absolute top-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
-        <div className="absolute bottom-0 left-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
-        <div className="absolute bottom-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
+    <div className="mt-10 bg-[#EEF5FF] flex items-center   justify-center p-6">
+      <div className="flex flex-col md:flex-row items-center border-[2px] bg-white rounded-xl l max-w-5xl w-full p-8 space-y-6 md:space-y-0 md:space-x-12">
+        {/* Subscription Plan Card */}
+        <div className="relative w-full md:w-1/2 bg-gray-900 text-white rounded-xl shadow-2xl py-12 px-8">
+          {/* Decorative circles */}
+          <div className="absolute top-0 left-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
+          <div className="absolute top-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
+          <div className="absolute bottom-0 left-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
+          <div className="absolute bottom-0 right-0 m-3 w-2 h-2 border border-gray-700 rounded-full"></div>
 
-        {/* PRO badge */}
-        <span className="absolute top-4 right-4 gradient-button text-xs font-bold px-2 py-1 rounded-full uppercase">
-          Pro
-        </span>
+          {/* Plan Badge */}
+          <span className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-xs font-bold px-2 py-1 rounded-full uppercase">
+            Pro
+          </span>
 
-        {/* Plan Name */}
-        <h2 className="text-xl font-bold mb-2">Unlimited Plan</h2>
-
-        {/* Price */}
-        <p className="text-3xl font-extrabold mb-1">
-          $10.00
-          <span className="text-lg font-normal"> /month</span>
-        </p>
-
-        {/* Error Message */}
-        {error && (
-          <p className="text-red-400 text-sm my-2 border border-red-400 p-2 rounded">
-            {error}
+          <h2 className="text-2xl font-bold mb-3">Unlimited Plan</h2>
+          <p className="text-4xl font-extrabold mb-3">
+            $10.00<span className="text-lg font-normal"> /month</span>
           </p>
-        )}
 
-        {/* Upgrade/Subscribe Button */}
-        <button
-          onClick={handleSubscribe}
-          disabled={loading}
-          className="w-full mt-4 nav  font-bold  text-white  py-2 rounded-md gradient-button transition-colors disabled:opacity-50"
-        >
-          {loading ? "Processing..." : "Upgrade Plan"}
-        </button>
+          {error && (
+            <p className="text-red-400 text-sm my-2 border border-red-400 p-2 rounded">
+              {error}
+            </p>
+          )}
 
-        {/* Features */}
-        <ul className="mt-6 space-y-3 text-sm">
-          <li className="flex items-start">
-            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
-            Unlimited script downloads
-          </li>
-          <li className="flex items-start">
-            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
-            100 tokens monthly for generating & rephrasing
-          </li>
-          <li className="flex items-start">
-            <FaCheck className="text-green-400 nav  mr-2 mt-1" />
-            No hidden fees
-          </li>
-          <li className="flex items-start">
-            <FaCheck className="text-green-400  nav  mr-2 mt-1" />
-            Cancel anytime
-          </li>
-        </ul>
+          <button
+            onClick={handleSubscribe}
+            disabled={loading}
+            className="w-full mt-4 bg-white text-black font-bold py-3 rounded-md transition-colors hover:bg-gray-200 disabled:opacity-50"
+          >
+            {loading ? "Processing..." : "Upgrade Plan"}
+          </button>
+        </div>
+
+        {/* Feature List */}
+        <div className="w-full md:w-1/2">
+          <ul className="space-y-4 text-sm text-gray-700">
+            <li className="flex items-start">
+              <FaCheck className="text-green-500 mr-2 mt-1" />
+              Unlimited script downloads
+            </li>
+            <li className="flex items-start">
+              <FaCheck className="text-green-500 mr-2 mt-1" />
+              100 tokens monthly for generating &amp; rephrasing
+            </li>
+            <li className="flex items-start">
+              <FaCheck className="text-green-500 mr-2 mt-1" />
+              No hidden fees
+            </li>
+            <li className="flex items-start">
+              <FaCheck className="text-green-500 mr-2 mt-1" />
+              Cancel anytime
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -73,7 +73,7 @@ function PromptCard({ prompt, onBookmarkToggle }) {
   };
 
   return (
-    <div className="rounded-lg shadow-md p-4 flex flex-col h-full bg-white">
+    <div className="card border-2 h-full flex flex-col p-4">
       {prompt.is_admin && prompt.image && (
         <img
           src={prompt.image}
@@ -83,25 +83,25 @@ function PromptCard({ prompt, onBookmarkToggle }) {
       )}
       <div className="flex-1">
         <h2 className="text-xl font-bold mb-1">{prompt.title || "Prompt"}</h2>
-        <p className="text-sm font-bold text-gray-600 mb-2">{prompt.niche}</p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm font-bold text-[var(--color-gray-dark)] mb-2">
+          {prompt.niche}
+        </p>
+        <p className="text-sm text-[var(--color-gray-dark)]">
           {truncateText(prompt.promptTemplate)}
         </p>
       </div>
       <div className="flex justify-between items-center mt-4">
+        {/* View Button */}
         <button
           onClick={() => navigate(`/prompts/${prompt._id}`)}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm"
+          className="btn"
         >
           View
         </button>
+        {/* Bookmark Button */}
         <button
           onClick={handleBookmark}
-          className={`py-1 px-3 rounded text-sm border border-blue-500 ${
-            isBookmarked
-              ? "bg-blue-500 text-white"
-              : "text-blue-500 hover:bg-blue-500 hover:text-white"
-          }`}
+          className={`btn ${isBookmarked && "active-filter"}`}
         >
           {isBookmarked ? "Bookmarked" : "Bookmark"}
         </button>

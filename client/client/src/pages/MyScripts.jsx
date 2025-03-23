@@ -101,85 +101,58 @@ function MyScripts() {
 
   return (
     // Prevent any horizontal overflow on mobile
-    <div className="bg-[#EEF5FF] min-h-screen overflow-x-hidden">
+    <div className="bg-[var(--color-bg)] min-h-screen overflow-x-hidden">
       <div className="container mx-auto max-w-full p-4 sm:p-6 lg:p-8 flex flex-col">
         {/* Filters Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white border border-[var(--color-gray-light)] rounded-lg p-4">
           {/* Status Filter Buttons */}
           <div className="flex flex-wrap gap-2">
-            <div className="gradient-border">
-              <button
-                onClick={() => setStatusFilter("all")}
-                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
-                  statusFilter === "all"
-                    ? "btn text-white"
-                    : "bg-[#EEF5FF] font-bold text-black"
-                }`}
-              >
-                All
-              </button>
-            </div>
-            <div className="gradient-border">
-              <button
-                onClick={() => setStatusFilter("used")}
-                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
-                  statusFilter === "used"
-                    ? "btn text-white"
-                    : "bg-[#EEF5FF] font-bold text-black"
-                }`}
-              >
-                Used
-              </button>
-            </div>
-            <div className="gradient-border">
-              <button
-                onClick={() => setStatusFilter("unused")}
-                className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-[12px] md:text-[13px] ${
-                  statusFilter === "unused"
-                    ? "btn text-white"
-                    : "bg-[#EEF5FF] font-bold text-black"
-                }`}
-              >
-                Unused
-              </button>
-            </div>
+            <button
+              onClick={() => setStatusFilter("all")}
+              className={`btn ${statusFilter === "all" && "active-filter"}`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setStatusFilter("used")}
+              className={`btn ${statusFilter === "used" && "active-filter"}`}
+            >
+              Used
+            </button>
+            <button
+              onClick={() => setStatusFilter("unused")}
+              className={`btn ${statusFilter === "unused" && "active-filter"}`}
+            >
+              Unused
+            </button>
           </div>
 
           {/* Date Picker */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="gradient-border">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 border text-[10px] sm:text-[12px] md:text-[13px] rounded-full bg-[#EEF5FF] shadow-sm"
-              />
-            </div>
-            <div className="gradient-border">
-              <button
-                onClick={() => setSelectedDate("")}
-                className="px-4 py-2 text-[10px] sm:text-[12px] md:text-[13px] rounded-full border bg-[#EEF5FF]"
-              >
-                Clear Date Filter
-              </button>
-            </div>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="input"
+            />
+            <button onClick={() => setSelectedDate("")} className="btn">
+              Clear Date Filter
+            </button>
           </div>
 
           {/* Niche Filter Dropdown */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="gradient-border">
-              <select
-                value={selectedNiche}
-                onChange={(e) => setSelectedNiche(e.target.value)}
-                className="px-3 py-2 border text-[10px] sm:text-[12px] md:text-[13px] rounded-full bg-[#EEF5FF] focus:outline-none shadow-sm"
-              >
-                {uniqueNiches.map((niche, index) => (
-                  <option key={index} value={niche}>
-                    {niche === "all" ? "All Niches" : niche}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedNiche}
+              onChange={(e) => setSelectedNiche(e.target.value)}
+              className="select"
+            >
+              {uniqueNiches.map((niche, index) => (
+                <option key={index} value={niche}>
+                  {niche === "all" ? "All Niches" : niche}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
