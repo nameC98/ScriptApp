@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import Modal from "../components/Modal";
 
@@ -20,8 +20,16 @@ function CustomScriptForm() {
   const [selectedNiche, setSelectedNiche] = useState("all");
 
   const navigate = useNavigate();
+  const location = useLocation(); // Added to retrieve state from navigation
   const userId = localStorage.getItem("userId");
   const userId2 = userId; // for consistency
+
+  // Pre-fill the topic if passed from TrendingTopics
+  useEffect(() => {
+    if (location.state && location.state.topic) {
+      setTopic(location.state.topic);
+    }
+  }, [location.state]);
 
   // Fetch available prompt templates from the backend.
   const fetchPrompts = async () => {
@@ -209,7 +217,7 @@ function CustomScriptForm() {
   };
 
   return (
-    <div className=" text-gray-500 mt-10 flex justify-center nav text-[13px] bg-[#EEF5FF]   p-6">
+    <div className="text-gray-500 mt-10 flex justify-center nav text-[13px] bg-[#EEF5FF] p-6">
       <div className="bg-white border-2 rounded-lg sm:p-8 py-6 px-4 w-full max-w-6xl">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">
           Generate Script
@@ -271,7 +279,7 @@ function CustomScriptForm() {
                     value={selectedPrompt ? selectedPrompt.promptTemplate : ""}
                     readOnly
                     placeholder="No prompt style selected"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-black focus:outline-none"
                   />
                   <button
                     type="button"
@@ -296,7 +304,6 @@ function CustomScriptForm() {
             </div>
           </div>
         </form>
-
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
       </div>
 

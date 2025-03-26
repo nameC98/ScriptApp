@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 function PromptDetailPage() {
   const { id } = useParams();
@@ -92,7 +93,7 @@ function PromptDetailPage() {
           {prompt.style}
         </p>
         <div className="prose mb-6">
-          <p>{prompt.promptTemplate}</p>
+          <ReactMarkdown>{prompt.promptTemplate}</ReactMarkdown>
         </div>
         {/* If the logged-in user is the creator, show Edit and Delete options */}
         {prompt.created_by === userId && (

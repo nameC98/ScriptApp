@@ -4,6 +4,7 @@ import {
   Route,
   NavLink,
   useLocation,
+  Link,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
@@ -35,8 +36,7 @@ import PostScript from "./admin/pages/PostScript";
 import TrendingTopics from "./pages/TrendingTopics";
 
 function NavBar({ user }) {
-  // Always call hooks at the top of the component
-  const [userData, setUserData] = useState([]);
+  const [userData, setUserData] = useState({}); // Initialized as object
   const [menuOpen, setMenuOpen] = useState(false);
   const userId2 = localStorage.getItem("userId");
   const location = useLocation();
@@ -45,7 +45,7 @@ function NavBar({ user }) {
   const hidePaths = ["/login", "/logout"];
   const shouldHide = hidePaths.includes(location.pathname);
 
-  // Fetch user info
+  // Fetch user info from the auth endpoint
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -66,6 +66,7 @@ function NavBar({ user }) {
     fetchUser();
   }, []);
 
+  // Optionally refresh user info when session_id is present in URL
   useEffect(() => {
     const fetchUser = async () => {
       const response = await fetch(
@@ -86,32 +87,33 @@ function NavBar({ user }) {
   if (shouldHide) return null;
 
   const activeClass =
-    "text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative after:content-[''] after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:rounded-lg after:bg-black ";
+    "text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative after:content-[''] after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:rounded-lg after:bg-black";
   const defaultClass =
     "text-gray-600 hover:text-gray-500 text-[12px] uppercase";
-
   return (
     <nav className="bg-white shadow border border-b p-4">
       <div className="lg:container mx-auto">
-        {/* Top Row: Logo and Right Side Items */}
+        {/*Top Row: Logo and Right Side Items*/}
         <div className="flex items-center justify-between">
-          {/* Logo */}
+          {/*Logo*/}
           <div className="flex items-center">
-            <img
-              src={Logo}
-              alt="Logo"
-              className="w-[6rem] h-[30px] sm:w-[13rem] sm:h-[50px]"
-            />
+            <Link to="/">
+              <img
+                src={Logo}
+                alt="Logo"
+                className="w-[10rem] h-[40px] sm:w-[16rem] sm:h-[60px] lg:w-[16rem] lg:h-[60px] md:h-[60px] md:w-[15rem]"
+              />
+            </Link>
           </div>
-          {/* Right Side: Tokens & User Avatar */}
+          {/*Right Side: Tokens & User Avatar*/}
           <div className="flex items-center lg:space-x-4 space-x-3">
-            {user && (
+            {userData && typeof userData.tokens !== "undefined" && (
               <NavLink
                 to={userData.tokens < 5 ? "/boost-tokens" : "#"}
                 className={`flex items-center space-x-2 px-3 py-1 rounded-full text-white text-[14px] shadow border border-gray-200 ${
                   userData.tokens < 5
-                    ? "bg-gradient-to-r from-yellow-400 to-red-500 animate-pulse hover:scale-105 transition-transform"
-                    : "bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-lg"
+                    ? "bg-black animate-pulse hover:scale-105 transition-transform"
+                    : "bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold  shadow-lg"
                 }`}
               >
                 <svg
@@ -122,26 +124,22 @@ function NavBar({ user }) {
                 >
                   <path d="M11 0L3 10h5l-1 10 8-12h-5z" />
                 </svg>
-                <span className="font-bold text-white">{user.tokens}</span>
+                <span className="font-bold text-white">{userData.tokens}</span>
               </NavLink>
             )}
-            <div className="flex items-center space-x-3">
-              <UserAvatar />
+            <div className="flex items-center md:space-x-10 space-x-2">
               <div className="flex lg:gap-5 gap-2">
-                <span className="text-black/70 hidden sm:flex text-[14px] font-semibold">
-                  {user ? user.name : "Guest"}
-                </span>
                 {userData && (
                   <div className="flex items-center space-x-2">
                     {userData.subscriptionStatus === "active" ? (
-                      <div className="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold shadow-lg">
+                      <div className="flex items-center px-3 py-2 rounded-full bg-black to-pink-500 text-white text-xs font-semibold shadow-lg">
                         <FaCrown className="mr-1 text-yellow-300" />
                         Pro
                       </div>
                     ) : (
                       <NavLink
                         to="/subscription"
-                        className="flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-red-500 text-white text-xs font-semibold shadow-lg animate-pulse hover:scale-105 transition-transform"
+                        className="flex items-center px-3 py-2 rounded-full bg-black text-white text-xs font-semibold shadow-lg animate-pulse hover:scale-105 transition-transform"
                       >
                         <FaCrown className="mr-1 text-white" />
                         Upgrade to Pro
@@ -150,8 +148,14 @@ function NavBar({ user }) {
                   </div>
                 )}
               </div>
+              <div>
+                <UserAvatar />
+                <span className="text-black/70 hidden sm:flex text-[14px] font-semibold">
+                  {userData.name || "Guest"}
+                </span>
+              </div>
             </div>
-            {/* Hamburger Menu for Mobile */}
+            {/*Hamburger Menu for Mobile*/}
             <div className="lg:hidden">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}

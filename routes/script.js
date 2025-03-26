@@ -604,16 +604,18 @@ router.post("/rephrase-preview", async (req, res) => {
         originalScript.content
       );
     } else {
-      finalPrompt = `${promptTemplate}\n\nRephrase the following script in the above style, ensuring that the original meaning and message are maintained:\n\n${originalScript.content}`;
+      finalPrompt = `${promptTemplate}\n\nRephrase the following script in the above style while excluding any stage directions, speaker labels, or content within square brackets. Maintain the original meaning and message. IMPORTANT: Ensure that you output the entire rephrased script in one complete text block without cutting off any portion, even if the script is long.\n\n${originalScript.content}`;
     }
 
     // Log the final combined statement (prompt) sent to the backend.
     console.log("Final combined statement sent to backend:", finalPrompt);
 
+    // Adjust the system message to instruct the model to not generate unwanted formatting.
     const messages = [
       {
         role: "system",
-        content: "You are a professional script editor for YouTube videos.",
+        content:
+          "You are a professional script editor for YouTube videos. When rephrasing, do not include any stage directions, descriptions, or speaker labels. Only output the spoken content, and ensure you provide the complete rephrased script in one finished response.",
       },
       {
         role: "user",
@@ -628,11 +630,13 @@ router.post("/rephrase-preview", async (req, res) => {
       messages,
       model: modelName,
       temperature: 0.8,
-      max_tokens: 800,
+      max_tokens: 1500, // Increased token limit to allow for longer outputs.
       top_p: 0.95,
     });
 
-    const rephrasedScript = responseChat.choices[0].message.content.trim();
+    let rephrasedScript = responseChat.choices[0].message.content.trim();
+
+    // Optionally, perform additional cleanup (if necessary)
     const baseTitle = originalScript.title.replace(/\s*\(Rephrased\)$/, "");
     const newTitle = `${baseTitle} (Rephrased)`;
 

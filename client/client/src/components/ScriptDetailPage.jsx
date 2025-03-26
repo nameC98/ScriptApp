@@ -13,6 +13,29 @@ import "react-toastify/dist/ReactToastify.css";
 import Modal from "./Modal";
 import ReactMarkdown from "react-markdown";
 
+// Helper function to reflow text (preserving paragraph breaks)
+const reflowText = (rawText) => {
+  return rawText
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\n/g, " "))
+    .join("\n\n");
+};
+
+// Helper function to strip common Markdown syntax from text
+const stripMarkdown = (text) => {
+  return (
+    text
+      // Remove bold (both ** and __)
+      .replace(/(\*\*|__)(.*?)\1/g, "$2")
+      // Remove italics (both * and _)
+      .replace(/(\*|_)(.*?)\1/g, "$2")
+      // Remove inline code blocks
+      .replace(/`(.*?)`/g, "$1")
+      // Remove strikethrough
+      .replace(/~~(.*?)~~/g, "$1")
+  );
+};
+
 function ScriptDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -143,10 +166,13 @@ function ScriptDetailPage() {
     }
   };
 
+  // Updated handleDownload now strips Markdown formatting
   const handleDownload = async () => {
     if (!script) return;
+    // Convert Markdown to plain text
+    const plainText = stripMarkdown(script.content);
     const element = document.createElement("a");
-    const file = new Blob([script.content], { type: "text/plain" });
+    const file = new Blob([plainText], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
     element.download = `${script.title}.txt`;
     document.body.appendChild(element);
@@ -327,6 +353,9 @@ function ScriptDetailPage() {
     );
   }
 
+  // Format the script content before rendering
+  const formattedContent = reflowText(script.content);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 py-8 px-4">
       <ToastContainer />
@@ -394,9 +423,9 @@ function ScriptDetailPage() {
         {/* Script Content */}
         <div
           className="prose max-w-none mb-8"
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
         >
-          <ReactMarkdown>{script.content}</ReactMarkdown>
+          <ReactMarkdown>{formattedContent}</ReactMarkdown>
         </div>
       </div>
 
@@ -454,7 +483,6 @@ function ScriptDetailPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* "No Style" option */}
                 <div
                   key="none"
                   className="border p-4 rounded-lg bg-indigo-200 hover:shadow-lg cursor-pointer"
@@ -508,7 +536,7 @@ function ScriptDetailPage() {
                 type="text"
                 value={previewTitle}
                 onChange={(e) => setPreviewTitle(e.target.value)}
-                className="input"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
                 placeholder="Script Title"
               />
             </div>
@@ -516,7 +544,7 @@ function ScriptDetailPage() {
               <textarea
                 value={previewContent}
                 onChange={(e) => setPreviewContent(e.target.value)}
-                className="textarea h-48"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none h-48"
                 placeholder="Script Content"
               />
             </div>
@@ -550,7 +578,7 @@ function ScriptDetailPage() {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="input"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
                 placeholder="Script Title"
               />
             </div>
@@ -558,7 +586,7 @@ function ScriptDetailPage() {
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="textarea h-60 sm:h-96"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none h-60 sm:h-96"
                 placeholder="Script Content"
               />
             </div>

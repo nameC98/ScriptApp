@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 function PromptCard({ prompt, onBookmarkToggle }) {
   const navigate = useNavigate();
@@ -34,12 +35,10 @@ function PromptCard({ prompt, onBookmarkToggle }) {
       ...prompt,
       favoriteUsers: optimisticFavoriteUsers,
     };
-
     // Inform the parent immediately so the change appears in filtered lists.
     if (onBookmarkToggle) {
       onBookmarkToggle(optimisticPrompt);
     }
-
     try {
       const response = await fetch(
         `http://localhost:5000/api/scripts/prompts/${prompt._id}/bookmark`,
@@ -51,14 +50,12 @@ function PromptCard({ prompt, onBookmarkToggle }) {
       );
       const data = await response.json();
       console.log("Bookmark toggled:", data);
-
       // Use the updated prompt from the API response.
       const updatedPrompt = data.prompt;
       const newBookmarkState =
         updatedPrompt.favoriteUsers &&
         updatedPrompt.favoriteUsers.includes(userId);
       setIsBookmarked(newBookmarkState);
-
       // Update parent state with the confirmed prompt data.
       if (onBookmarkToggle) {
         onBookmarkToggle(updatedPrompt);
@@ -87,7 +84,7 @@ function PromptCard({ prompt, onBookmarkToggle }) {
           {prompt.niche}
         </p>
         <p className="text-sm text-[var(--color-gray-dark)]">
-          {truncateText(prompt.promptTemplate)}
+          <ReactMarkdown>{truncateText(prompt.promptTemplate)}</ReactMarkdown>
         </p>
       </div>
       <div className="flex justify-between items-center mt-4">
@@ -98,7 +95,7 @@ function PromptCard({ prompt, onBookmarkToggle }) {
         >
           View
         </button>
-        {/* Bookmark Button */}
+        {/*Bookmark Button*/}
         <button
           onClick={handleBookmark}
           className={`btn ${isBookmarked && "active-filter"}`}
