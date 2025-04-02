@@ -132,7 +132,7 @@ function MyScripts() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="input"
+              className="btn"
             />
             <button onClick={() => setSelectedDate("")} className="btn">
               Clear Date Filter
@@ -144,7 +144,7 @@ function MyScripts() {
             <select
               value={selectedNiche}
               onChange={(e) => setSelectedNiche(e.target.value)}
-              className="select"
+              className="btn"
             >
               {uniqueNiches.map((niche, index) => (
                 <option key={index} value={niche}>

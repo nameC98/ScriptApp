@@ -6,6 +6,7 @@ const scriptSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: function () {
+        // Only require userId if not an admin post
         return !this.isAdmin;
       },
     },
@@ -31,6 +32,7 @@ const scriptSchema = new mongoose.Schema(
       default: "unused",
     },
     isAdmin: { type: Boolean, default: false },
+    rating: { type: Number, default: 5 },
   },
   { timestamps: true }
 );

@@ -6,10 +6,11 @@ function PostScript() {
   const [niche, setNiche] = useState("");
   const [style, setStyle] = useState("");
   const [snippet, setSnippet] = useState("");
+  const [rating, setRating] = useState(""); // New rating state
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Assuming admin userId is stored in localStorage (or fetched from context)
+  // Assuming admin userId is stored in localStorage
   const userId = localStorage.getItem("userId");
 
   const handleSubmit = async (e) => {
@@ -20,6 +21,8 @@ function PostScript() {
       return;
     }
     try {
+      // Convert rating to a number if provided, otherwise use default 5
+      const ratingValue = rating ? parseFloat(rating) : 5;
       const response = await fetch(
         "http://localhost:5000/api/admin/admin-sripts",
         {
@@ -32,6 +35,7 @@ function PostScript() {
             niche,
             snippet,
             style,
+            rating: ratingValue,
           }),
         }
       );
@@ -46,8 +50,9 @@ function PostScript() {
       setNiche("");
       setSnippet("");
       setStyle("");
+      setRating("");
       setError("");
-      // Optionally redirect or refresh list
+      // Optionally, redirect or refresh list
       // navigate("/admin/scripts");
     } catch (err) {
       setError(err.message);
@@ -126,6 +131,25 @@ function PostScript() {
                 placeholder="Enter a short snippet/summary"
                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-300"
               />
+            </div>
+            {/* Rating Field */}
+            <div>
+              <label className="block text-gray-700">
+                Rating (0.5 to 5 stars)
+              </label>
+              <input
+                type="number"
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+                placeholder="Enter rating"
+                min="0.5"
+                max="5"
+                step="0.5"
+                className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+              <p className="text-xs text-gray-500">
+                Leave empty for default (5 stars)
+              </p>
             </div>
             {/* Submit Button */}
             <div>

@@ -204,7 +204,7 @@ router.patch("/users/:id/plan", async (req, res) => {
 
 // POST: Admin creates a new public script
 router.post("/admin-sripts", async (req, res) => {
-  const { userId, title, content, niche, snippet, style } = req.body;
+  const { userId, title, content, niche, snippet, style, rating } = req.body;
   if (!userId || !title || !content || !niche || !style) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -216,6 +216,7 @@ router.post("/admin-sripts", async (req, res) => {
       niche,
       style,
       snippet,
+      rating: rating || 5,
       status: "unused",
       isAdmin: true,
     });
@@ -226,6 +227,7 @@ router.post("/admin-sripts", async (req, res) => {
     res.status(500).json({ error: "Error posting admin script" });
   }
 });
+
 // POST: Create a new prompt template (admin creation)
 router.post("/prompt", async (req, res) => {
   const { niche, style, promptTemplate } = req.body;

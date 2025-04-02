@@ -76,7 +76,7 @@ export default function Subscription() {
           <button
             onClick={handleSubscribe}
             disabled={loading}
-            className="w-full mt-4 bg-white text-black font-bold py-3 rounded-md transition-colors hover:bg-gray-200 disabled:opacity-50"
+            className="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3  rounded-md transition-colors hover:bg-gray-200 disabled:opacity-50"
           >
             {loading ? "Processing..." : "Upgrade Plan"}
           </button>

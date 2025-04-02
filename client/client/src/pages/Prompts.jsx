@@ -165,7 +165,7 @@ function PromptsPage() {
             <select
               value={selectedNiche}
               onChange={(e) => setSelectedNiche(e.target.value)}
-              className="select"
+              className="btn"
             >
               {uniqueNiches.map((niche, index) => (
                 <option key={index} value={niche}>

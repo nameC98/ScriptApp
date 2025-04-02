@@ -87,7 +87,7 @@ function NavBar({ user }) {
   if (shouldHide) return null;
 
   const activeClass =
-    "text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative after:content-[''] after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:rounded-lg after:bg-black";
+    "text-gray-600 uppercase tracking-widest text-[12px] font-extrabold relative after:content-[''] after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:rounded-lg after:bg-black  ";
   const defaultClass =
     "text-gray-600 hover:text-gray-500 text-[12px] uppercase";
   return (
@@ -97,13 +97,13 @@ function NavBar({ user }) {
         <div className="flex items-center justify-between">
           {/*Logo*/}
           <div className="flex items-center">
-            <Link to="/">
+            {/* <Link to="/">
               <img
                 src={Logo}
                 alt="Logo"
                 className="w-[10rem] h-[40px] sm:w-[16rem] sm:h-[60px] lg:w-[16rem] lg:h-[60px] md:h-[60px] md:w-[15rem]"
               />
-            </Link>
+            </Link> */}
           </div>
           {/*Right Side: Tokens & User Avatar*/}
           <div className="flex items-center lg:space-x-4 space-x-3">
